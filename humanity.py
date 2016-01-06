@@ -1,3 +1,5 @@
+#! /usr/bin/env python3
+
 ''' 
 ('RU') Данный модуль заменяет стандартные типы данных последовательностей (списки, кортежи, строки) аналогичными типами данных,
 в которых индексация идет не с нуля а с единицы. Пример: a = humlist(1,2,3); print(a[2]) выведет 2.
@@ -273,5 +275,23 @@ class humstr(str):
 
 
 
-def humrange(n):
-	return range(1, n+1)
+def humrange(*n):
+	''' list(humrange(3)) == [1,2,3]; list(humrange(2, 3)) == [2,3]; list(humrange(10, 8, -1)) == [10, 9, 8];'''
+	try: n[3] # если больше трех аргументов
+	except Exception: pass
+	else: return range(*n)
+	try: n[2] # если три аргумента
+	except Exception: pass
+	else: 
+		if n[0] < n[1]:
+			return range(n[0], n[1] + 1, n[2]) # + и - дают включительность
+		elif n[0] > n[1]:
+			return range(n[0], n[1] - 1, n[2])
+		#elif n[0] == n[1] and n[2] == -1:
+		#	return range(n[0], n[1] - 2, n[2])
+	try: n[1] # если два аргумента
+	except Exception: pass
+	else: return range(n[0], n[1] + 1)
+	try: n[0] # если один аргумент - else
+	except Exception: range() # если ничего не передано
+	else: return range(1, n[0] + 1) # если один аргумент
