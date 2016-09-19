@@ -1,5 +1,4 @@
 #! /usr/bin/env python3
-
 ''' 
 ('RU') Данный модуль заменяет стандартные типы данных последовательностей (списки, кортежи, строки) аналогичными типами данных,
 в которых индексация идет не с нуля а с единицы. Пример: a = humlist(1,2,3); print(a[2]) выведет 2.
@@ -59,7 +58,10 @@ Importing module:
 		is a file with the executable program.
 2) Import: import from humanity *
 or: import humanity
+
+Version: 2.2
 '''
+
 
 
 
@@ -68,7 +70,10 @@ def changeIndexes(keys):
 	Она смещает в последовательностях номер первого элемента с [0] на [1].
 	если в функц. передается один аргумент, он int и пишется в keys
 	если пытаешься брать срез, keys присваивается объект среза вида: slice(1, None, None)'''
-	''' В других методах не используется, так как там нету объектов среза: slice(1, None, None), там можно просто отнять 1 от индекса или добавить'''
+	''' В других методах не используется, так как там нету объектов среза: slice(1, None, None), там можно просто отнять 1 от индекса или добавить
+	
+	version: 1
+	'''
 	if isinstance(keys, slice):
 		keys = str(keys) # isinstance(n,int) не помогает
 		keys = keys.replace('slice(', '').replace(')', '')
@@ -92,8 +97,14 @@ def changeIndexes(keys):
 
 
 
+
 class humlist(list):
-	# ('RU') технические методы:
+	'''Class, that is the same to list type, but with normal indexes.
+	version: 2
+	'''
+
+	# Технические методы:
+	
 	def __init__(self, *something):
 		'''('EN') humlist(1,2) will create [1, 2], humlist([1,2]) will create [1, 2], humlist((1,2), (2,3)) will create [(1, 2), (2, 3)] 
 		('RU') Подобные есть и в humtuple и в humstr, только называется __new__.'''
@@ -107,27 +118,34 @@ class humlist(list):
 				list.__init__(self, something)
 		else: # если два и более аргумента
 			list.__init__(self, something) # возвращать ничего не нужно (для базового класса так)
+			
 	def __getitem__(self, keys):
 		'''('EN') x.__getitem__(y) <==> x[y]. If A = [1,2,3], than A[1] will give 1'''
 		keys = changeIndexes(keys)
 		return list.__getitem__(self, keys)
+		
 	def __setitem__(self, keys, value):
 		'''('EN') Set self[key] to value. If A = [1,2,3], than A[1] = 5 will change A so: [5,2,3]'''
 		keys = changeIndexes(keys)
 		list.__setitem__(self, keys, value)#второй аргумент просит итерируемый объект вида: (slice(1,2,1), ) или (1, )
+		
 	def __delitem__(self, keys):
 		'''('EN') Delete self[key]. If A = [1,2,3], than A[1] = 5 will change A so: [5,2,3]''' 
 		keys = changeIndexes(keys)
 		list.__delitem__(self, keys)
-	# нетехнические методы:
+		
+	# Нетехнические методы:
+	
 	def insert(self, position, value):
 		position = changeIndexes(position)
 		list.insert(self, position, value)
+		
 	def index(self, value, *positions):
 		try: # если есть лишние позиции, распакуем их все в оригинальный метод, чтобы получить оригинальную ошибку
 			positions[0]; positions[1]; positions[2]
 		except Exception: pass
 		else: return list.index(self, value, *positions)
+		
 		try: # если есть и стартовая, и конечная позиция
 			positions[0]; positions[1]
 		except Exception: pass
@@ -135,6 +153,7 @@ class humlist(list):
 			start = positions[0] - 1
 			end = positions[1]
 			return list.index(self, value, start, end) + 1
+			
 		try: # если есть только стартовая позиция - переходим к else
 			positions[0]
 		except Exception: # если позиции не были переданы вообще:
@@ -146,10 +165,17 @@ class humlist(list):
 
 
 
+
 class humtuple(tuple):
-	# технические методы:
+	'''Class, that is the same to tuple type, but with normal indexes.
+	version: 2
+	'''
+	
+	# Технические методы:
+	
 	#def __init__(self, something):
 		#У кортежей нет этого метода. Вместо него - __new__. Если добавить __init__ - будут работать оба.
+		
 	def __new__(self, *something): #только init не канает. Походу он вообще тут не работает.
 		'''('EN') Analog to __init__ method in humlist class
 		('RU') Но они не одинаковы - у каждого свои нюансы.'''
@@ -163,24 +189,30 @@ class humtuple(tuple):
 				return tuple.__new__(self, something)
 		else: # если два и более аргумента
 			return tuple.__new__(self, something) # возвращать ничего не нужно (для базового класса так)
+			
 	def __getitem__(self, keys):
 		'''('EN') Analog to similar method in humlist class'''
 		keys = changeIndexes(keys)
 		return tuple.__getitem__(self, keys)
+		
 	def __setitem__(self, keys, value):
 		'''('EN') Analog to similar method in humlist class'''
 		keys = changeIndexes(keys)
 		return tuple.__setitem__(self, keys, value)#второй аргумент просит итерируемый объект вида: (slice(1,2,1), ) или (1, )
+		
 	def __delitem__(self, keys):
 		'''('EN') Analog to similar method in humlist class'''
 		keys = changeIndexes(keys)
 		return tuple.__delitem__(self, keys)
-	# нетехнические методы:
+		
+	# Нетехнические методы:
+	
 	def index(self, value, *positions):
 		try: # если есть лишние позиции, распакуем их все в оригинальный метод, чтобы получить оригинальную ошибку
 			positions[0]; positions[1]; positions[2]
 		except Exception: pass
 		else: return tuple.index(self, value, *positions)
+		
 		try: # если есть и стартовая, и конечная позиция
 			positions[0]; positions[1]
 		except Exception: pass
@@ -188,6 +220,7 @@ class humtuple(tuple):
 			start = positions[0] - 1
 			end = positions[1]
 			return tuple.index(self, value, start, end) + 1
+			
 		try: # если есть только стартовая позиция - переходим к else
 			positions[0]
 		except Exception: # если позиции не были переданы вообще:
@@ -199,10 +232,17 @@ class humtuple(tuple):
 
 
 
+
 class humstr(str):
-	# технические методы:
+	'''Class, that is the same to string type, but with normal indexes.
+	version: 2
+	'''
+	
+	# Технические методы:
+	
 	#def __init__(self, something):
 		#У кортежей нет этого метода. Вместо него - __new__. Если добавить __init__ - будут работать оба.
+	
 	def __new__(self, *something): #только init не канает. Походу он вообще тут не работает.
 		'''('EN') Analog to __init__ method in humlist class
 		('RU') Но они не одинаковы - у каждого свои нюансы.'''
@@ -216,27 +256,34 @@ class humstr(str):
 				return str.__new__(self, something)
 		else: # если два и более аргумента
 			return str.__new__(self, something) # возвращать ничего не нужно (для базового класса так)
+	
 	def __getitem__(self, keys):
 		'''('EN') Analog to similar method in humlist class'''
 		keys = changeIndexes(keys)
 		return str.__getitem__(self, keys)
+	
 	def __setitem__(self, keys, value):
 		'''('EN') Analog to similar method in humlist class'''
 		keys = changeIndexes(keys)
 		return str.__setitem__(self, keys, value)#второй аргумент просит итерируемый объект вида: (slice(1,2,1), ) или (1, )
+	
 	def __delitem__(self, keys):
 		'''('EN') Analog to similar method in humlist class'''
 		keys = changeIndexes(keys)
 		return str.__delitem__(self, keys)
-	# нетехнические методы:
+	
+	# Нетехнические методы:
+	
 	def find(self, value):
 		return str.find(self, value) + 1
 	# def rfind и так возвращает правильное значение
+	
 	def index(self, value, *positions):
 		try: # если есть лишние позиции, распакуем их все в оригинальный метод, чтобы получить оригинальную ошибку
 			positions[0]; positions[1]; positions[2]
 		except Exception: pass
 		else: return str.index(self, value, *positions)
+		
 		try: # если есть и стартовая, и конечная позиция
 			positions[0]; positions[1]
 		except Exception: pass
@@ -244,6 +291,7 @@ class humstr(str):
 			start = positions[0] - 1
 			end = positions[1]
 			return str.index(self, value, start, end) + 1
+		
 		try: # если есть только стартовая позиция - переходим к else
 			positions[0]
 		except Exception: # если позиции не были переданы вообще:
@@ -252,11 +300,13 @@ class humstr(str):
 			start = positions[0] - 1
 			return str.index(self, value, start) + 1
 		# копия метода есть в классах humlist, humtuple
+	
 	def rindex(self, value, *positions):
 		try: # если есть лишние позиции, распакуем их все в оригинальный метод, чтобы получить оригинальную ошибку
 			positions[0]; positions[1]; positions[2]
 		except Exception: pass
 		else: return str.rindex(self, value, *positions)
+		
 		try: # если есть и стартовая, и конечная позиция
 			positions[0]; positions[1]
 		except Exception: pass
@@ -264,6 +314,7 @@ class humstr(str):
 			start = positions[0] - 1
 			end = positions[1]
 			return str.rindex(self, value, start, end) + 1
+		
 		try: # если есть только стартовая позиция - переходим к else
 			positions[0]
 		except Exception: # если позиции не были переданы вообще:
@@ -275,11 +326,16 @@ class humstr(str):
 
 
 
+
 def humrange(*n):
-	''' list(humrange(3)) == [1,2,3]; list(humrange(2, 3)) == [2,3]; list(humrange(10, 8, -1)) == [10, 9, 8];'''
+	'''Function, that is the same to range() function, but with normal indexes.
+	list(humrange(3)) == [1,2,3]; list(humrange(2, 3)) == [2,3]; list(humrange(10, 8, -1)) == [10, 9, 8]
+	version: 1
+	'''
 	try: n[3] # если больше трех аргументов
 	except Exception: pass
 	else: return range(*n)
+	
 	try: n[2] # если три аргумента
 	except Exception: pass
 	else: 
@@ -289,9 +345,11 @@ def humrange(*n):
 			return range(n[0], n[1] - 1, n[2])
 		#elif n[0] == n[1] and n[2] == -1:
 		#	return range(n[0], n[1] - 2, n[2])
+	
 	try: n[1] # если два аргумента
 	except Exception: pass
 	else: return range(n[0], n[1] + 1)
+	
 	try: n[0] # если один аргумент - else
 	except Exception: range() # если ничего не передано
 	else: return range(1, n[0] + 1) # если один аргумент
