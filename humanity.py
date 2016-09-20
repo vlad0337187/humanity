@@ -59,7 +59,7 @@ Importing module:
 2) Import: import from humanity *
 or: import humanity
 
-Version: 2.2
+Version: 2.3
 '''
 
 
@@ -98,6 +98,12 @@ def changeIndexes(keys):
 
 
 
+def getitem():
+	pass
+	
+	
+
+
 class humlist(list):
 	'''Class, that is the same to list type, but with normal indexes.
 	version: 2
@@ -109,9 +115,9 @@ class humlist(list):
 		'''('EN') humlist(1,2) will create [1, 2], humlist([1,2]) will create [1, 2], humlist((1,2), (2,3)) will create [(1, 2), (2, 3)] 
 		('RU') Подобные есть и в humtuple и в humstr, только называется __new__.'''
 		try: something[1]; something[0] # если два и более аргумента - else:
-		except Exception: # если нет двух и более:
+		except IndexError: # если нет двух и более:
 			try: something[0] # если только один аргумент - else:
-			except Exception: # если ни одного аргумента
+			except IndexError: # если ни одного аргумента
 				list.__init__(self, something)
 			else: # если только один аргумент
 				something = something[0]
@@ -143,12 +149,12 @@ class humlist(list):
 	def index(self, value, *positions):
 		try: # если есть лишние позиции, распакуем их все в оригинальный метод, чтобы получить оригинальную ошибку
 			positions[0]; positions[1]; positions[2]
-		except Exception: pass
+		except IndexError: pass
 		else: return list.index(self, value, *positions)
 		
 		try: # если есть и стартовая, и конечная позиция
 			positions[0]; positions[1]
-		except Exception: pass
+		except IndexError: pass
 		else: 
 			start = positions[0] - 1
 			end = positions[1]
@@ -156,12 +162,21 @@ class humlist(list):
 			
 		try: # если есть только стартовая позиция - переходим к else
 			positions[0]
-		except Exception: # если позиции не были переданы вообще:
+		except IndexError: # если позиции не были переданы вообще:
 			return list.index(self, value) + 1
 		else: # если есть только стартовая позиция
 			start = positions[0] - 1
 			return list.index(self, value, start) + 1
 		# копия метода есть в классах humtuple, humstr
+		
+	def get(self, position):
+		'''Returns value of element on position. If such element is absent - returns None.
+		'''
+		try:
+			value = self.__getitem__(self, position)
+		except IndexError:
+			value = None
+		return None
 
 
 
@@ -180,9 +195,9 @@ class humtuple(tuple):
 		'''('EN') Analog to __init__ method in humlist class
 		('RU') Но они не одинаковы - у каждого свои нюансы.'''
 		try: something[1]; something[0] # если два и более аргумента - else:
-		except Exception: # если нет двух и более:
+		except IndexError: # если нет двух и более:
 			try: something[0] # если только один аргумент - else:
-			except Exception: # если ни одного аргумента
+			except IndexError: # если ни одного аргумента
 				return tuple.__new__(self, something)
 			else: # если только один аргумент
 				something = something[0]
@@ -210,12 +225,12 @@ class humtuple(tuple):
 	def index(self, value, *positions):
 		try: # если есть лишние позиции, распакуем их все в оригинальный метод, чтобы получить оригинальную ошибку
 			positions[0]; positions[1]; positions[2]
-		except Exception: pass
+		except IndexError: pass
 		else: return tuple.index(self, value, *positions)
 		
 		try: # если есть и стартовая, и конечная позиция
 			positions[0]; positions[1]
-		except Exception: pass
+		except IndexError: pass
 		else: 
 			start = positions[0] - 1
 			end = positions[1]
@@ -223,12 +238,21 @@ class humtuple(tuple):
 			
 		try: # если есть только стартовая позиция - переходим к else
 			positions[0]
-		except Exception: # если позиции не были переданы вообще:
+		except IndexError: # если позиции не были переданы вообще:
 			return tuple.index(self, value) + 1
 		else: # если есть только стартовая позиция
 			start = positions[0] - 1
 			return tuple.index(self, value, start) + 1
 		# копия метода есть в классах humlist, humstr
+		
+	def get(self, position):
+		'''Returns value of element on position. If such element is absent - returns None.
+		'''
+		try:
+			value = self.__getitem__(self, position)
+		except IndexError:
+			value = None
+		return None
 
 
 
@@ -247,9 +271,9 @@ class humstr(str):
 		'''('EN') Analog to __init__ method in humlist class
 		('RU') Но они не одинаковы - у каждого свои нюансы.'''
 		try: something[1]; something[0] # если два и более аргумента - else:
-		except Exception: # если нет двух и более:
+		except IndexError: # если нет двух и более:
 			try: something[0] # если только один аргумент - else:
-			except Exception: # если ни одного аргумента
+			except IndexError: # если ни одного аргумента
 				return str.__new__(self)
 			else: # если только один аргумент
 				something = something[0]
@@ -281,12 +305,12 @@ class humstr(str):
 	def index(self, value, *positions):
 		try: # если есть лишние позиции, распакуем их все в оригинальный метод, чтобы получить оригинальную ошибку
 			positions[0]; positions[1]; positions[2]
-		except Exception: pass
+		except IndexError: pass
 		else: return str.index(self, value, *positions)
 		
 		try: # если есть и стартовая, и конечная позиция
 			positions[0]; positions[1]
-		except Exception: pass
+		except IndexError: pass
 		else: 
 			start = positions[0] - 1
 			end = positions[1]
@@ -294,7 +318,7 @@ class humstr(str):
 		
 		try: # если есть только стартовая позиция - переходим к else
 			positions[0]
-		except Exception: # если позиции не были переданы вообще:
+		except IndexError: # если позиции не были переданы вообще:
 			return str.index(self, value) + 1
 		else: # если есть только стартовая позиция
 			start = positions[0] - 1
@@ -304,12 +328,12 @@ class humstr(str):
 	def rindex(self, value, *positions):
 		try: # если есть лишние позиции, распакуем их все в оригинальный метод, чтобы получить оригинальную ошибку
 			positions[0]; positions[1]; positions[2]
-		except Exception: pass
+		except IndexError: pass
 		else: return str.rindex(self, value, *positions)
 		
 		try: # если есть и стартовая, и конечная позиция
 			positions[0]; positions[1]
-		except Exception: pass
+		except IndexError: pass
 		else: 
 			start = positions[0] - 1
 			end = positions[1]
@@ -317,12 +341,21 @@ class humstr(str):
 		
 		try: # если есть только стартовая позиция - переходим к else
 			positions[0]
-		except Exception: # если позиции не были переданы вообще:
+		except IndexError: # если позиции не были переданы вообще:
 			return str.rindex(self, value) + 1
 		else: # если есть только стартовая позиция
 			start = positions[0] - 1
 			return str.rindex(self, value, start) + 1
 		# метод основан на методе index, копии которого есть в классах humlist, humtuple, humstr
+		
+	def get(self, position):
+		'''Returns value of element on position. If such element is absent - returns None.
+		'''
+		try:
+			value = self.__getitem__(self, position)
+		except IndexError:
+			value = None
+		return None
 
 
 
@@ -333,11 +366,11 @@ def humrange(*n):
 	version: 1
 	'''
 	try: n[3] # если больше трех аргументов
-	except Exception: pass
+	except IndexError: pass
 	else: return range(*n)
 	
 	try: n[2] # если три аргумента
-	except Exception: pass
+	except IndexError: pass
 	else: 
 		if n[0] < n[1]:
 			return range(n[0], n[1] + 1, n[2]) # + и - дают включительность
@@ -347,9 +380,9 @@ def humrange(*n):
 		#	return range(n[0], n[1] - 2, n[2])
 	
 	try: n[1] # если два аргумента
-	except Exception: pass
+	except IndexError: pass
 	else: return range(n[0], n[1] + 1)
 	
 	try: n[0] # если один аргумент - else
-	except Exception: range() # если ничего не передано
+	except IndexError: range() # если ничего не передано
 	else: return range(1, n[0] + 1) # если один аргумент
