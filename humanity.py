@@ -59,8 +59,12 @@ Importing module:
 2) Import: import from humanity *
 or: import humanity
 
-Version: 2.3
+Version: 2.4
 '''
+
+
+
+
 
 
 
@@ -95,18 +99,72 @@ def changeIndexes(keys):
 		if keys > 0:
 			keys = keys - 1
 		elif keys == 0:
-			raise IndexError('There is no element under index 0')
-		elif keys < 0:
-			pass	
+			raise IndexError('There is no element under index 0')	
 	return keys
 
 
 
 
-def getitem():
-	pass
+
+
+
+
+def sequence_get(self, keys):
+	'''Get method for sequences.
+	Returns value of element on position (keys). If such element is absent - returns None.
+	Used in: humlist, humtuple, humstr.
+	version: 1
+	'''
+	try:
+		value = self.__getitem__(keys)
+	except IndexError:
+		value = None
+	return value
+
+
+def sequence_index(self, value, *positions):
+	'''Index method for sequences.
+	Returns index of element with specified value (optional in positions).
+	version: 1
+	'''
 	
+	length = len(positions)
 	
+	if length >= 3:
+		raise TypeError('index() takes at most 3 arguments ({0} given)'.format(length+1))
+	elif length == 2:
+		start = positions[0] - 1
+		end = positions[1]
+		return self.__class__.__base__.index(self, value, start, end) + 1
+	elif length == 1:
+		start = positions[0] - 1
+		return self.__class__.__base__.index(self, value, start) + 1
+	else:  # если нет вообще позиций
+		return self.__class__.__base__.index(self, value) + 1
+
+
+
+
+def sequence__getitem__(self, keys):
+	keys = changeIndexes(keys)
+	return self.__class__.__base__.__getitem__(self, keys)
+
+def sequence__setitem__(self, keys, value):
+	'''('EN') Set self[key] to value. If A = [1,2,3], than A[1] = 5 will change A to: [5,2,3]
+	'''
+	keys = changeIndexes(keys)
+	self.__class__.__base__.__setitem__(self, keys, value) # keys - итерируемый объект: (slice(1,2,1), ) или (1, )
+
+def sequence__delitem__(self, keys):
+	'''('EN') Delete self[key]. If A = [1,2,3], than A[1] = 5 will change A so: [5,2,3]''' 
+	keys = changeIndexes(keys)
+	self.__class__.__base__.__delitem__(self, keys)
+
+
+
+
+
+
 
 
 class humlist(list):
@@ -129,59 +187,26 @@ class humlist(list):
 				list.__init__(self, something)
 		else: # если два и более аргумента
 			list.__init__(self, something) # возвращать ничего не нужно (для базового класса так)
-			
-	def __getitem__(self, keys):
-		'''('EN') x.__getitem__(y) <==> x[y]. If A = [1,2,3], than A[1] will give 1'''
-		keys = changeIndexes(keys)
-		return list.__getitem__(self, keys)
-		
-	def __setitem__(self, keys, value):
-		'''('EN') Set self[key] to value. If A = [1,2,3], than A[1] = 5 will change A so: [5,2,3]'''
-		keys = changeIndexes(keys)
-		list.__setitem__(self, keys, value)#второй аргумент просит итерируемый объект вида: (slice(1,2,1), ) или (1, )
-		
-	def __delitem__(self, keys):
-		'''('EN') Delete self[key]. If A = [1,2,3], than A[1] = 5 will change A so: [5,2,3]''' 
-		keys = changeIndexes(keys)
-		list.__delitem__(self, keys)
-		
+	
+	
+	__getitem__ = sequence__getitem__
+	__setitem__ = sequence__setitem__
+	__delitem__ = sequence__delitem__
+	
+	
 	# Нетехнические методы:
 	
 	def insert(self, position, value):
 		position = changeIndexes(position)
 		list.insert(self, position, value)
-		
-	def index(self, value, *positions):
-		try: # если есть лишние позиции, распакуем их все в оригинальный метод, чтобы получить оригинальную ошибку
-			positions[0]; positions[1]; positions[2]
-		except IndexError: pass
-		else: return list.index(self, value, *positions)
-		
-		try: # если есть и стартовая, и конечная позиция
-			positions[0]; positions[1]
-		except IndexError: pass
-		else: 
-			start = positions[0] - 1
-			end = positions[1]
-			return list.index(self, value, start, end) + 1
-			
-		try: # если есть только стартовая позиция - переходим к else
-			positions[0]
-		except IndexError: # если позиции не были переданы вообще:
-			return list.index(self, value) + 1
-		else: # если есть только стартовая позиция
-			start = positions[0] - 1
-			return list.index(self, value, start) + 1
-		# копия метода есть в классах humtuple, humstr
-		
-	def get(self, position):
-		'''Returns value of element on position. If such element is absent - returns None.
-		'''
-		try:
-			value = self.__getitem__(self, position)
-		except IndexError:
-			value = None
-		return None
+	
+	
+	index = sequence_index
+	get = sequence_get
+
+
+
+
 
 
 
@@ -195,7 +220,8 @@ class humtuple(tuple):
 	
 	#def __init__(self, something):
 		#У кортежей нет этого метода. Вместо него - __new__. Если добавить __init__ - будут работать оба.
-		
+	
+	
 	def __new__(self, *something): #только init не канает. Походу он вообще тут не работает.
 		'''('EN') Analog to __init__ method in humlist class
 		('RU') Но они не одинаковы - у каждого свои нюансы.'''
@@ -209,55 +235,33 @@ class humtuple(tuple):
 				return tuple.__new__(self, something)
 		else: # если два и более аргумента
 			return tuple.__new__(self, something) # возвращать ничего не нужно (для базового класса так)
-			
+	
+	
 	def __getitem__(self, keys):
 		'''('EN') Analog to similar method in humlist class'''
 		keys = changeIndexes(keys)
 		return tuple.__getitem__(self, keys)
-		
+	
+	
 	def __setitem__(self, keys, value):
 		'''('EN') Analog to similar method in humlist class'''
 		keys = changeIndexes(keys)
 		return tuple.__setitem__(self, keys, value)#второй аргумент просит итерируемый объект вида: (slice(1,2,1), ) или (1, )
-		
+	
+	
 	def __delitem__(self, keys):
 		'''('EN') Analog to similar method in humlist class'''
 		keys = changeIndexes(keys)
 		return tuple.__delitem__(self, keys)
 		
 	# Нетехнические методы:
-	
-	def index(self, value, *positions):
-		try: # если есть лишние позиции, распакуем их все в оригинальный метод, чтобы получить оригинальную ошибку
-			positions[0]; positions[1]; positions[2]
-		except IndexError: pass
-		else: return tuple.index(self, value, *positions)
 		
-		try: # если есть и стартовая, и конечная позиция
-			positions[0]; positions[1]
-		except IndexError: pass
-		else: 
-			start = positions[0] - 1
-			end = positions[1]
-			return tuple.index(self, value, start, end) + 1
-			
-		try: # если есть только стартовая позиция - переходим к else
-			positions[0]
-		except IndexError: # если позиции не были переданы вообще:
-			return tuple.index(self, value) + 1
-		else: # если есть только стартовая позиция
-			start = positions[0] - 1
-			return tuple.index(self, value, start) + 1
-		# копия метода есть в классах humlist, humstr
-		
-	def get(self, position):
-		'''Returns value of element on position. If such element is absent - returns None.
-		'''
-		try:
-			value = self.__getitem__(self, position)
-		except IndexError:
-			value = None
-		return None
+	index = sequence_index
+	get = sequence_get
+
+
+
+
 
 
 
@@ -271,6 +275,7 @@ class humstr(str):
 	
 	#def __init__(self, something):
 		#У кортежей нет этого метода. Вместо него - __new__. Если добавить __init__ - будут работать оба.
+	
 	
 	def __new__(self, *something): #только init не канает. Походу он вообще тут не работает.
 		'''('EN') Analog to __init__ method in humlist class
@@ -286,81 +291,78 @@ class humstr(str):
 		else: # если два и более аргумента
 			return str.__new__(self, something) # возвращать ничего не нужно (для базового класса так)
 	
+	
 	def __getitem__(self, keys):
 		'''('EN') Analog to similar method in humlist class'''
 		keys = changeIndexes(keys)
 		return str.__getitem__(self, keys)
+	
 	
 	def __setitem__(self, keys, value):
 		'''('EN') Analog to similar method in humlist class'''
 		keys = changeIndexes(keys)
 		return str.__setitem__(self, keys, value)#второй аргумент просит итерируемый объект вида: (slice(1,2,1), ) или (1, )
 	
+	
 	def __delitem__(self, keys):
 		'''('EN') Analog to similar method in humlist class'''
 		keys = changeIndexes(keys)
 		return str.__delitem__(self, keys)
 	
+	
 	# Нетехнические методы:
 	
 	def find(self, value):
 		return str.find(self, value) + 1
-	# def rfind и так возвращает правильное значение
+	# rfind и так возвращает правильное значение
 	
-	def index(self, value, *positions):
-		try: # если есть лишние позиции, распакуем их все в оригинальный метод, чтобы получить оригинальную ошибку
-			positions[0]; positions[1]; positions[2]
-		except IndexError: pass
-		else: return str.index(self, value, *positions)
-		
-		try: # если есть и стартовая, и конечная позиция
-			positions[0]; positions[1]
-		except IndexError: pass
-		else: 
-			start = positions[0] - 1
-			end = positions[1]
-			return str.index(self, value, start, end) + 1
-		
-		try: # если есть только стартовая позиция - переходим к else
-			positions[0]
-		except IndexError: # если позиции не были переданы вообще:
-			return str.index(self, value) + 1
-		else: # если есть только стартовая позиция
-			start = positions[0] - 1
-			return str.index(self, value, start) + 1
-		# копия метода есть в классах humlist, humtuple
 	
 	def rindex(self, value, *positions):
-		try: # если есть лишние позиции, распакуем их все в оригинальный метод, чтобы получить оригинальную ошибку
-			positions[0]; positions[1]; positions[2]
-		except IndexError: pass
-		else: return str.rindex(self, value, *positions)
-		
-		try: # если есть и стартовая, и конечная позиция
-			positions[0]; positions[1]
-		except IndexError: pass
-		else: 
+		length = len(positions)
+	
+		if length >= 3:
+			raise TypeError('index() takes at most 3 arguments ({0} given)'.format(length+1))
+		elif length == 2:
 			start = positions[0] - 1
 			end = positions[1]
-			return str.rindex(self, value, start, end) + 1
-		
-		try: # если есть только стартовая позиция - переходим к else
-			positions[0]
-		except IndexError: # если позиции не были переданы вообще:
-			return str.rindex(self, value) + 1
-		else: # если есть только стартовая позиция
+			return self.__class__.__base__.rindex(self, value, start, end) + 1
+		elif length == 1:
 			start = positions[0] - 1
-			return str.rindex(self, value, start) + 1
-		# метод основан на методе index, копии которого есть в классах humlist, humtuple, humstr
+			return self.__class__.__base__.index(self, value, start) + 1
+		else:  # если нет вообще позиций
+			return self.__class__.__base__.index(self, value) + 1
+	
+	
+	def format(self, *args, **kwargs):
+		if args:
+			return str.format(self, '', *args, **kwargs)
+		else:
+			return str.format(self, **kwargs)
 		
-	def get(self, position):
-		'''Returns value of element on position. If such element is absent - returns None.
+	index = sequence_index
+	get = sequence_get
+
+
+
+
+
+
+
+
+class humdict(dict):
+	def get(self, key):
+		'''Returns value of element on name (key). If such element is absent - returns None.
+		Used in: dict. (variant for sequences is named sequence_get)
 		'''
 		try:
-			value = self.__getitem__(self, position)
-		except IndexError:
+			value = self.__getitem__(self, key)
+		except KeyError:
 			value = None
-		return None
+		return value
+
+
+
+
 
 
 
