@@ -72,7 +72,7 @@ def changeIndexes(keys):
 	если пытаешься брать срез, keys присваивается объект среза вида: slice(1, None, None)'''
 	''' В других методах не используется, так как там нету объектов среза: slice(1, None, None), там можно просто отнять 1 от индекса или добавить
 	
-	version: 1
+	version: 1.1
 	'''
 	if isinstance(keys, slice):
 		keys = str(keys) # isinstance(n,int) не помогает
@@ -92,7 +92,12 @@ def changeIndexes(keys):
 			keys[2] = None
 		keys = slice(keys[0], keys[1], keys[2]) # потому что должна быть последовательность с одним элементом
 	elif isinstance(keys, int): #если нет 'slice(', значит целое число
-		keys = keys - 1
+		if keys > 0:
+			keys = keys - 1
+		elif keys == 0:
+			raise IndexError('There is no element under index 0')
+		elif keys < 0:
+			pass	
 	return keys
 
 
