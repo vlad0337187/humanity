@@ -59,7 +59,7 @@ Importing module:
 2) Import: import from humanity *
 or: import humanity
 
-Version: 2.4
+Version: 2.6
 '''
 
 
@@ -76,35 +76,97 @@ def changeIndexes(keys):
 	если пытаешься брать срез, keys присваивается объект среза вида: slice(1, None, None)'''
 	''' В других методах не используется, так как там нету объектов среза: slice(1, None, None), там можно просто отнять 1 от индекса или добавить
 	
-	version: 1.1
+	version: 1.3
 	'''
 	if isinstance(keys, slice):
-		keys = str(keys) # isinstance(n,int) не помогает
-		keys = keys.replace('slice(', '').replace(')', '')
-		keys = keys.split(', ')
-		if keys[0] != 'None':
-			keys[0] = int(keys[0]) - 1
-		elif keys[0] == 'None':
-			keys[0] = None
-		if keys[1] != 'None':
-			keys[1] = int(keys[1])
-		elif keys[1] == 'None':
-			keys[1] = None
-		if keys[2] != 'None':# это шаг
-			keys[2] = int(keys[2])
-		elif keys[2] == 'None':
-			keys[2] = None
-		keys = slice(keys[0], keys[1], keys[2]) # потому что должна быть последовательность с одним элементом
+	
+		'''if keys.start == 0:  # проверки:
+			raise IndexError('There is no element under index 0')'''
+		if keys.step == 0:
+			raise ValueError('slice step cannot be zero')
+
+		# обычный порядок всегда, кроме когда есть и 1 и 2, 2 больше 1
+		if (keys.start and (keys.stop != None)) and (keys.start > keys.stop):  # обратный порядок
+		
+			if keys.step == None:  # проверки:
+				raise IndexError('Step cannot be default (positive) while reverse order.')
+			elif keys.step > 0:
+				raise IndexError('Step cannot be positive while reverse order.')
+				
+			if keys.start > 0:
+				start = keys.start - 1
+				if keys.stop >= 2:
+					stop = keys.stop - 2
+				elif 0 <= keys.stop  <= 1:
+					stop = None
+				else:
+					stop = keys.stop
+				keys = slice(start, stop, keys.step)
+			
+		else:  # прямой порядок
+			if keys.start:
+				if keys.start > 0:
+					keys = slice(keys.start - 1, keys.stop, keys.step)
+		
+
 	elif isinstance(keys, int): #если нет 'slice(', значит целое число
+	
 		if keys > 0:
 			keys = keys - 1
-		elif keys == 0:
-			raise IndexError('There is no element under index 0')	
+		elif keys == 0:  # проверки:
+			raise IndexError('There is no element under index 0')
+	
 	return keys
 
 
 
 
+
+
+
+for x in ('list', 'tuple', 'str'):  # __init__ and __new__ methods
+	if x == 'list':
+		method = '__init__'
+		retn = ''
+	else:
+		method = '__new__'
+		retn = 'return '
+	exec(
+	"""def {x}{method}(self, *something):
+		'''('EN') humlist(1,2) > [1, 2]; humlist([1,2]) > [1, 2]; humlist((1,2), (2,3)) > [(1, 2), (2, 3)] 
+		('RU') Подобные есть и в humtuple и в humstr, только называется __new__.
+		'''	
+		
+		length = len(something)
+		if length > 1:
+			{retn}{x}.{method}(self, something) # возвращать ничего не нужно (для базового класса так)
+		elif length == 1:
+			if something[0].__class__ == tuple:
+				{retn}{x}.{method}(self, something[0])
+			else:
+				{retn}{x}.{method}(self, something)
+		else:
+			{retn}{x}.{method}(self, something)""".format(x=x, method=method, retn=retn))
+else:
+	del method, retn, x
+
+
+
+
+def sequence__getitem__(self, keys):
+	keys = changeIndexes(keys)
+	return self.__class__.__base__.__getitem__(self, keys)
+
+def sequence__setitem__(self, keys, value):
+	'''('EN') Set self[key] to value. If A = [1,2,3], than A[1] = 5 will change A to: [5,2,3]
+	'''
+	keys = changeIndexes(keys)
+	self.__class__.__base__.__setitem__(self, keys, value) # keys - итерируемый объект: (slice(1,2,1), ) или (1, )
+
+def sequence__delitem__(self, keys):
+	'''('EN') Delete self[key]. If A = [1,2,3], than A[1] = 5 will change A so: [5,2,3]''' 
+	keys = changeIndexes(keys)
+	self.__class__.__base__.__delitem__(self, keys)
 
 
 
@@ -145,25 +207,6 @@ def sequence_index(self, value, *positions):
 
 
 
-def sequence__getitem__(self, keys):
-	keys = changeIndexes(keys)
-	return self.__class__.__base__.__getitem__(self, keys)
-
-def sequence__setitem__(self, keys, value):
-	'''('EN') Set self[key] to value. If A = [1,2,3], than A[1] = 5 will change A to: [5,2,3]
-	'''
-	keys = changeIndexes(keys)
-	self.__class__.__base__.__setitem__(self, keys, value) # keys - итерируемый объект: (slice(1,2,1), ) или (1, )
-
-def sequence__delitem__(self, keys):
-	'''('EN') Delete self[key]. If A = [1,2,3], than A[1] = 5 will change A so: [5,2,3]''' 
-	keys = changeIndexes(keys)
-	self.__class__.__base__.__delitem__(self, keys)
-
-
-
-
-
 
 
 
@@ -174,10 +217,22 @@ class humlist(list):
 
 	# Технические методы:
 	
-	def __init__(self, *something):
-		'''('EN') humlist(1,2) will create [1, 2], humlist([1,2]) will create [1, 2], humlist((1,2), (2,3)) will create [(1, 2), (2, 3)] 
+	"""def __init__(self, *something):
+		'''('EN') humlist(1,2) > [1, 2]; humlist([1,2]) > [1, 2]; humlist((1,2), (2,3)) > [(1, 2), (2, 3)] 
 		('RU') Подобные есть и в humtuple и в humstr, только называется __new__.'''
-		try: something[1]; something[0] # если два и более аргумента - else:
+		length = len(something)
+		if length > 1:
+			list.__init__(self, something) # возвращать ничего не нужно (для базового класса так)
+		elif length == 1:
+			if something[0].__class__ == tuple:
+				list.__init__(self, something[0])
+			else:
+				list.__init__(self, something)
+		else:
+			list.__init__(self, something)"""
+	__init__ = list__init__
+			
+	"""try: something[1]; something[0] # если два и более аргумента - else:
 		except IndexError: # если нет двух и более:
 			try: something[0] # если только один аргумент - else:
 			except IndexError: # если ни одного аргумента
@@ -186,7 +241,7 @@ class humlist(list):
 				something = something[0]
 				list.__init__(self, something)
 		else: # если два и более аргумента
-			list.__init__(self, something) # возвращать ничего не нужно (для базового класса так)
+			list.__init__(self, something) # возвращать ничего не нужно (для базового класса так)"""
 	
 	
 	__getitem__ = sequence__getitem__
@@ -221,8 +276,7 @@ class humtuple(tuple):
 	#def __init__(self, something):
 		#У кортежей нет этого метода. Вместо него - __new__. Если добавить __init__ - будут работать оба.
 	
-	
-	def __new__(self, *something): #только init не канает. Походу он вообще тут не работает.
+	"""def __new__(self, *something): #только init не канает. Походу он вообще тут не работает.
 		'''('EN') Analog to __init__ method in humlist class
 		('RU') Но они не одинаковы - у каждого свои нюансы.'''
 		try: something[1]; something[0] # если два и более аргумента - else:
@@ -234,7 +288,8 @@ class humtuple(tuple):
 				something = something[0]
 				return tuple.__new__(self, something)
 		else: # если два и более аргумента
-			return tuple.__new__(self, something) # возвращать ничего не нужно (для базового класса так)
+			return tuple.__new__(self, something) # возвращать ничего не нужно (для базового класса так)"""
+	__new__ = tuple__new__
 	
 	
 	def __getitem__(self, keys):
@@ -355,7 +410,7 @@ class humdict(dict):
 		Used in: dict. (variant for sequences is named sequence_get)
 		'''
 		try:
-			value = self.__getitem__(self, key)
+			value = self.__getitem__(key)
 		except KeyError:
 			value = None
 		return value
