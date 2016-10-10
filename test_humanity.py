@@ -24,13 +24,17 @@ def create_sequence(sequence, classname):  # чтобы несколько ра�
 	'''Создает и возвращает объект нужно типа из входных данных последовательности
 	и имени класса возвращаемого объекта.
 	'''
-	# a = (1,2,3) >>> str(a) >>> '(1, 2, 3)'
-	if classname == 'humlist' or classname == 'humtuple':
+	
+	if sequence.__class__ == tuple:	
 		return eval("{0}{1}".format(classname, str(sequence)))  # результат всегда в скобках
-	elif classname == 'humstr':
-		sequence = str(sequence).replace(', ', '')
-		sequence = sequence.replace(' ', '')  # чтобы не было ошибки
-		return eval("{0}{1}".format(classname, sequence))
+	else:
+		if classname == 'humstr':
+			print('humstr was that')
+			print(sequence)
+			return eval("{0}{1}".format(classname, '('+str(sequence)+')'))  # результат всегда в скобках
+		else:
+			return eval("{0}{1}".format(classname, '('+str(sequence)+',)'))  # результат всегда в скобках
+
 
 def create_object(value, classname):
 	if classname == 'humlist' or classname == 'humtuple':
@@ -91,11 +95,11 @@ def sequence_test_slices_13(self):
 	with self.assertRaises(ValueError):
 		self.i[9:1:0]
 
-def sequence_test_slices_13(self):
-	'''Обратный порядок. Шаг равен размеру массива.'''
-	self.assertEqual( self.i[9:1:-9], create_sequence((9,), self.classname) )  # запятая для теста
-
 def sequence_test_slices_14(self):
+	'''Обратный порядок. Шаг равен размеру массива.'''
+	self.assertEqual( self.i[9:1:-9], create_sequence(9, self.classname) )  # запятая для теста
+
+def sequence_test_slices_15(self):
 	'''Обратный порядок. Без шага.'''
 	with self.assertRaises(IndexError):
 		self.i[9:1:]
@@ -247,6 +251,10 @@ class TestHumrange(unittest.TestCase):
 	
 	def test_humrange_15(self):
 		self.assertEqual( list(humrange(2)), [1, 2] )
+
+
+
+
 
 
 
