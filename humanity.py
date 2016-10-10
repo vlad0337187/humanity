@@ -59,7 +59,7 @@ Importing module:
 2) Import: import from humanity *
 or: import humanity
 
-Version: 2.8
+Revision: 3
 '''
 
 
