@@ -63,6 +63,8 @@ Revision: 4
 '''
 
 
+from decimal import Decimal  # for humfrange
+
 
 
 
@@ -386,7 +388,10 @@ def humrange(*n):
 
 
 
-def humfrange(a, b, step):
+
+
+
+"""def humfrange(a, b, step):  # old function-generator
 	'''Same as humrange, but including float numbers.
 	'''
 	if a < b:  # straight order
@@ -411,5 +416,92 @@ def humfrange(a, b, step):
 		while True:
 			yield a
 			break
-		return
+		return"""
 
+
+
+
+
+
+
+
+class humfrange():  # not a function because need of .__len__() method
+	'''Same as humrange, but including decimal (earlier was float) numbers.
+	Returns Decimal() numbers.
+	'''
+	
+	def __init__(self, a, b, step):
+		self.check_type_errors(a, b, step)
+		
+		a, b, step = Decimal(a), Decimal(b), Decimal(step)
+		
+		self.a, self.b, self.step = a, b, step
+		self.current = a
+		
+		self.check_logic_errors()
+	
+	
+	def check_type_errors(self, a, b, step):
+		if (a.__class__ == float) or (b.__class__ == float) or (step.__class__ == float):
+			raise TypeError('Please, use Decimal(), int, or float, which is written as string (in quotes), because general float type cannot reproduce all numbers - some of them are changed to other, what causes errors.')
+	
+	def check_logic_errors(self):
+		'''Checks current instance of humfrange for errors.
+		Is launched from .__init__().
+		'''
+		
+		if self.a < self.b:
+			if self.step <= 0:
+				raise ValueError("Step can't be lesser or equal to zero while straight order.")
+		elif self.a > self.b:  # reverse order
+			if self.step >= 0:  # can't be
+				raise ValueError("Step can't be larger or equal to zero while reverse order.")
+		else:  # a == b
+			if self.step <= 0:
+				raise ValueError("Step can't be lesser or equal to zero while straight order.")
+	
+	
+	def __iter__(self):
+		self.first_time = True  # to return a first
+		return self
+	
+	
+	def __next__(self):
+	
+		if self.first_time:  # first time
+			self.first_time = False
+			return self.a
+		
+		self.current += self.step
+		
+		if self.a < self.b:  # straight order
+			if self.current <= self.b:
+				return self.current
+			else:
+				raise StopIteration()
+		
+		elif self.a > self.b:  # reverse order
+			if self.current >= self.b:
+				return self.current
+			else:
+				raise StopIteration()
+		
+		elif self.a == self.b:  # a == b
+			if self.current == self.a:
+				return self.a
+			else:
+				raise StopIteration()
+	
+	
+	def __len__(self):
+		return int((self.b - self.a) / self.step + 1)
+
+
+
+
+
+
+
+
+if __name__ == '__main__':  # temporary checks
+	print(len(humfrange(1, 3, '0.2')))

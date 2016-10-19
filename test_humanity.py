@@ -294,20 +294,41 @@ class TestHumfrange(unittest.TestCase):
 			list(humfrange(4, 2, 1))
 	
 	def test_humfrange_13(self):
-		self.assertEqual( list(humfrange(4, 3, -0.5)), [4, 3.5, 3] )
+		self.assertEqual( list(humfrange(4, 3, '-0.5')), [4, 3.5, 3] )
 	
 	def test_humfrange_14(self):
-		self.assertEqual( list(humfrange(3, 4, 0.5)), [3, 3.5, 4] )
+		self.assertEqual( list(humfrange(3, 4, '0.5')), [3, 3.5, 4] )
 	
 	def test_humfrange_15(self):
 		with self.assertRaises(ValueError):
-			list(humfrange(4, 3, 0.5))
+			list(humfrange(4, 3, '0.5'))
 	
 	def test_humfrange_16(self):
 		with self.assertRaises(ValueError):
-			list(humfrange(3, 4, -0.5))
-
-		
+			list(humfrange(3, 4, '-0.5'))
+	
+	def test_humfrange_17(self):
+		self.assertEqual( len(humfrange(4, 3, '-0.5')), 3 )
+	
+	def test_humfrange_18(self):
+		self.assertEqual( len(humfrange(1, 3, '0.2')), 11 )
+	
+	def test_humfrange_19(self):
+		with self.assertRaises(TypeError):
+			humfrange(0.5, 3, 1)
+	
+	def test_humfrange_20(self):
+		with self.assertRaises(TypeError):
+			humfrange(5, 3.1, 1)
+	
+	def test_humfrange_21(self):
+		with self.assertRaises(TypeError):
+			humfrange(5, 3, 0.1)
+	
+	def test_humfrange_22(self):
+		self.assertEqual( list(humfrange('1', 3, '0.4')), 
+			[Decimal('1'), Decimal('1.4'), Decimal('1.8'), 
+			Decimal('2.2'), Decimal('2.6'), Decimal('3.0')] )
 
 
 
