@@ -63,7 +63,7 @@ Revision: 4
 '''
 
 
-from decimal import Decimal  # for humfrange
+from decimal import Decimal  # for humdrange
 
 
 
@@ -425,9 +425,10 @@ def humrange(*n):
 
 
 
-class humfrange():  # not a function because need of .__len__() method
+class humdrange():  # not a function because need of .__len__() method
 	'''Same as humrange, but including decimal (earlier was float) numbers.
 	Returns Decimal() numbers.
+	rev. 1
 	'''
 	
 	def __init__(self, a, b, step):
@@ -439,26 +440,45 @@ class humfrange():  # not a function because need of .__len__() method
 		self.current = a
 		
 		self.check_logic_errors()
+		
+		self.length = self.__len__()
 	
 	
 	def check_type_errors(self, a, b, step):
+		'''Is launched from .__init__().
+		rev.2
+		'''
+		# check for float
 		if (a.__class__ == float) or (b.__class__ == float) or (step.__class__ == float):
 			raise TypeError('Please, use Decimal(), int, or float, which is written as string (in quotes), because general float type cannot reproduce all numbers - some of them are changed to other, what causes errors.')
+		
+		# we check a
+		if not ((a.__class__ == int) or (a.__class__ == str) or (a.__class__ == Decimal)):
+			raise TypeError('Start value must be int or decimal, written as string, or Decimal')
+		# we check b
+		if not ((b.__class__ == int) or (b.__class__ == str) or (b.__class__ == Decimal)):
+			raise TypeError('Start value must be int or float, written as string, or Decimal')
+		# we check step
+		if not ((step.__class__ == int) or (step.__class__ == str) or (step.__class__ == Decimal)):
+			raise TypeError('Start value must be int or float, written as string, or Decimal')
+	
 	
 	def check_logic_errors(self):
-		'''Checks current instance of humfrange for errors.
+		'''Checks current instance of humdrange for errors.
 		Is launched from .__init__().
+		rev. 1
 		'''
+		if self.step == 0:
+			raise ValueError("Step can't be equal to zero.")
 		
-		if self.a < self.b:
-			if self.step <= 0:
-				raise ValueError("Step can't be lesser or equal to zero while straight order.")
-		elif self.a > self.b:  # reverse order
-			if self.step >= 0:  # can't be
-				raise ValueError("Step can't be larger or equal to zero while reverse order.")
-		else:  # a == b
-			if self.step <= 0:
-				raise ValueError("Step can't be lesser or equal to zero while straight order.")
+		if self.a > self.b:  # reverse order
+			if self.step > 0:
+				raise ValueError("Step can't be positive while reverse order.")
+		else:  # straight order or a == b
+			if self.step < 0:
+				raise ValueError("Step can't be negative while straight order.")
+	
+	
 	
 	
 	def __iter__(self):
@@ -486,15 +506,115 @@ class humfrange():  # not a function because need of .__len__() method
 			else:
 				raise StopIteration()
 		
-		elif self.a == self.b:  # a == b
+		else:  # a == b
 			if self.current == self.a:
 				return self.a
 			else:
 				raise StopIteration()
 	
 	
+	
+	
 	def __len__(self):
-		return int((self.b - self.a) / self.step + 1)
+		try:
+			self.length
+		except AttributeError:  # if no such attribute
+			return int((self.b - self.a) / self.step + 1)
+		else:
+			return self.length
+	
+	
+	
+	
+	def __getitem__(self, key):
+		'''Returns or decimal number, if key is int, or new appropriate humdrange, if key is slice.
+		rev. 1
+		'''
+		if type(key) == int:
+			self.check_key_for_errors(key)
+			if self.a == self.b:
+				return self.a
+			else:  # straight or reverse order
+				return self.a + (self.step * (key - 1))  # key can be only positive
+		
+		elif type(key) == slice:  # (slice)
+			key = self.replace_negative_keys(key)
+			self.check_slice_for_errors(key)
+			
+			if key.start:
+				start = self[key.start]
+			else:
+				start = self.a
+			if key.stop:
+				stop = self[key.stop]
+			else:
+				stop = self.b
+			if key.step:
+				step = key.step * self.step
+			else:
+				step = self.step
+			
+			return humdrange(start, stop, step)
+		
+		else:
+			raise TypeError('Key is not of an appropriate type. It must be int or slice.')
+			
+		
+	def check_key_for_errors(self, key):
+		'''Is used in .__getitem__().
+		'''
+		if not (type(key) == int):
+			raise TypeError('Key must be int.')
+		
+		if not (1 <= key <= self.__len__()):
+			raise IndexError('Key index out of range.')
+	
+	
+	def check_slice_for_errors(self, key):
+		'''Is used in .__getitem__().
+		'''
+		# check types
+		if not ( (type(key.start) == int) or (key.start == None) ):
+			raise TypeError('Start value must be int or omitted.')
+		if not ( (type(key.stop) == int) or (key.stop == None) ):
+			raise TypeError('Stop value must be int or omitted.')
+		if not ( (type(key.step) == int) or (key.step == None) ):
+			raise TypeError('Step value must be int or omitted.')	
+		
+		# check start and stop indexes		
+		if key.start:
+			if not (1 <= key.start <= self.__len__()):
+				raise IndexError('Key index out of range.')
+		if key.stop:
+			if not (1 <= key.stop <= self.__len__()):
+				raise IndexError('Key index out of range.')
+		
+		# now we check step
+		if key.step:  # because if it's None, than will be error while "key.step > 0"				
+			if (key.start and key.stop) and (key.start > key.stop):  # reverse order
+				if key.step > 0:
+					raise ValueError('Step cannot be positive while reverse order.')
+			else:  # straight order
+				if key.step < 0:
+					raise ValueError('Step cannot be negative while straight order.')
+		elif key.step == 0:			
+			raise ValueError('Step cannot be zero.')
+	
+	def replace_negative_keys(self, key):
+		'''Replaces negative key's values (which mean counting from the end of range)
+		with positive ones (which mean counting from start of range).
+		It doesn't return anything - it replaces so it is.
+		'''
+		if key.start and (key.start < 0):
+			start = (self.__len__() + 1) - key.start
+		else:
+			start = key.start
+		if key.stop and (key.stop < 0):
+			stop = (self.__len__() + 1) - key.start
+		else:
+			stop = key.stop
+		
+		return slice(start, stop, key.step)
 
 
 
@@ -504,4 +624,4 @@ class humfrange():  # not a function because need of .__len__() method
 
 
 if __name__ == '__main__':  # temporary checks
-	print(len(humfrange(1, 3, '0.2')))
+	list(humdrange('1', 2, '0.5')[1:])

@@ -259,76 +259,135 @@ class TestHumrange(unittest.TestCase):
 
 
 
-class TestHumfrange(unittest.TestCase):
+class Testhumdrange(unittest.TestCase):
 	def setUp(self):
 		pass
 	def tearDown(self):
 		pass
 	
 	
-	def test_humfrange_1(self):
-		self.assertEqual( list(humfrange(4, 4, 1)), [4] )
+	def test_humdrange_1(self):
+		self.assertEqual( list(humdrange(4, 4, 1)), [4] )
 		
-	def test_humfrange_2(self):
+	def test_humdrange_2(self):
 		with self.assertRaises(ValueError):
-			list(humfrange(4, 4, -1))
+			list(humdrange(4, 4, -1))
 	
-	def test_humfrange_4(self):
+	def test_humdrange_4(self):
 		with self.assertRaises(ValueError):
 			list(humrange(4, 4, 0))
 	
-	def test_humfrange_8(self):
-		self.assertEqual( list(humfrange(4, 2, -1)), [4, 3, 2] )
+	def test_humdrange_8(self):
+		self.assertEqual( list(humdrange(4, 2, -1)), [4, 3, 2] )
 	
-	def test_humfrange_9(self):
-		self.assertEqual( list(humfrange(4, 2, -2)), [4, 2] )
+	def test_humdrange_9(self):
+		self.assertEqual( list(humdrange(4, 2, -2)), [4, 2] )
 	
-	def test_humfrange_10(self):
-		self.assertEqual( list(humfrange(1, -1, -2)), [1, -1] )
+	def test_humdrange_10(self):
+		self.assertEqual( list(humdrange(1, -1, -2)), [1, -1] )
 	
-	def test_humfrange_11(self):
-		self.assertEqual( list(humfrange(1, -1, -1)), [1, 0, -1] )
+	def test_humdrange_11(self):
+		self.assertEqual( list(humdrange(1, -1, -1)), [1, 0, -1] )
 	
-	def test_humfrange_12(self):
+	def test_humdrange_12(self):
 		with self.assertRaises(ValueError):
-			list(humfrange(4, 2, 1))
+			list(humdrange(4, 2, 1))
 	
-	def test_humfrange_13(self):
-		self.assertEqual( list(humfrange(4, 3, '-0.5')), [4, 3.5, 3] )
+	def test_humdrange_13(self):
+		self.assertEqual( list(humdrange(4, 3, '-0.5')), [4, 3.5, 3] )
 	
-	def test_humfrange_14(self):
-		self.assertEqual( list(humfrange(3, 4, '0.5')), [3, 3.5, 4] )
+	def test_humdrange_14(self):
+		self.assertEqual( list(humdrange(3, 4, '0.5')), [3, 3.5, 4] )
 	
-	def test_humfrange_15(self):
+	def test_humdrange_15(self):
 		with self.assertRaises(ValueError):
-			list(humfrange(4, 3, '0.5'))
+			list(humdrange(4, 3, '0.5'))
 	
-	def test_humfrange_16(self):
+	def test_humdrange_16(self):
 		with self.assertRaises(ValueError):
-			list(humfrange(3, 4, '-0.5'))
+			list(humdrange(3, 4, '-0.5'))
 	
-	def test_humfrange_17(self):
-		self.assertEqual( len(humfrange(4, 3, '-0.5')), 3 )
+	def test_humdrange_17(self):
+		self.assertEqual( len(humdrange(4, 3, '-0.5')), 3 )
 	
-	def test_humfrange_18(self):
-		self.assertEqual( len(humfrange(1, 3, '0.2')), 11 )
+	def test_humdrange_18(self):
+		self.assertEqual( len(humdrange(1, 3, '0.2')), 11 )
 	
-	def test_humfrange_19(self):
+	def test_humdrange_19(self):
 		with self.assertRaises(TypeError):
-			humfrange(0.5, 3, 1)
+			humdrange(0.5, 3, 1)
 	
-	def test_humfrange_20(self):
+	def test_humdrange_20(self):
 		with self.assertRaises(TypeError):
-			humfrange(5, 3.1, 1)
+			humdrange(5, 3.1, 1)
 	
-	def test_humfrange_21(self):
+	def test_humdrange_21(self):
 		with self.assertRaises(TypeError):
-			humfrange(5, 3, 0.1)
+			humdrange(5, 3, 0.1)
 	
-	def test_humfrange_22(self):
-		self.assertEqual( list(humfrange('1', 3, '0.4')), 
+	def test_humdrange_22(self):
+		self.assertEqual( list(humdrange('1', 3, '0.4')), 
 			[Decimal('1'), Decimal('1.4'), Decimal('1.8'), 
 			Decimal('2.2'), Decimal('2.6'), Decimal('3.0')] )
+	
+	def test_humdrange_23(self):
+		self.assertEqual( humdrange('1', 3, '0.4')[2], Decimal('1.4'))
+	
+	def test_humdrange_24(self):
+		self.assertEqual( humdrange('3', 1, '-0.4')[2], Decimal('2.6'))
+	
+	def test_humdrange_25(self):
+		self.assertEqual( list(humdrange('3', 1, '-0.4')[1:3]), [Decimal('3.0'), Decimal('2.6'), Decimal('2.2')] )
+	
+	def test_humdrange_26(self):
+		self.assertEqual( humdrange('3', 1, '-0.4')[1], Decimal('3.0'))
+	
+	def test_humdrange_27(self):
+		self.assertEqual( humdrange('8', 0, '-0.1')[4], Decimal('7.7'))
+	
+	def test_humdrange_28(self):
+		self.assertEqual( list(humdrange('1', 2, '0.5')[1:]), [Decimal('1.0'), Decimal('1.5'), Decimal('2.0')])
+	
+	def test_humdrange_29(self):
+		self.assertEqual( list(humdrange('1', 2, '0.5')[:3]), [Decimal('1.0'), Decimal('1.5'), Decimal('2.0')])
+	
+	def test_humdrange_30(self):
+		self.assertEqual( list(humdrange('1', 2, '0.5')[:]), [Decimal('1.0'), Decimal('1.5'), Decimal('2.0')])
+	
+	def test_humdrange_31(self):
+		self.assertEqual( list(humdrange('1', 2, '0.5')[1:3:2]), [Decimal('1.0'), Decimal('2.0')])
+	
+	def test_humdrange_32(self):
+		self.assertEqual( list(humdrange('1', 2, '0.5')[::2]), [Decimal('1.0'), Decimal('2.0')])
+	
+	def test_humdrange_33(self):
+		self.assertEqual( list(humdrange(5, 3, '-0.1')[1::2]) , [Decimal('5.0'), Decimal('4.8'), 
+			Decimal('4.6'), Decimal('4.4'), Decimal('4.2'), Decimal('4.0'), Decimal('3.8'), 
+			Decimal('3.6'), Decimal('3.4'), Decimal('3.2'), Decimal('3.0')] )
+	
+	def test_humdrange_34(self):
+		with self.assertRaises(IndexError):  # because of zero passed to slice
+			humdrange(5, 3, '-0.1')[0]
+	
+	def test_humdrange_35(self):
+		with self.assertRaises(ValueError):  # because of "-2" passed to slice
+			humdrange(5, 3, '-0.1')[1::-2]
+	
+	def test_humdrange_36(self):
+		with self.assertRaises(ValueError):  # because of zero passed to slice
+			humdrange(3, 5, '0.1')[0:2:-2]
+	
+	def test_humdrange_37(self):
+		with self.assertRaises(ValueError):  # because of zero passed to slice
+			humdrange(5, 3, '-0.1')[1:0:-2]
+	
+	def test_humdrange_38(self):
+		with self.assertRaises(ValueError):  # because of zero passed to slice
+			humdrange(3, 5, '0.1')[1:2:0]
+	
+	
+	
+	
 
 
 
