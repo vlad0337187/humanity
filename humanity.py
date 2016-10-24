@@ -59,7 +59,7 @@ Importing module:
 2) Import: import from humanity *
 or: import humanity
 
-Revision: 4
+Revision: 6
 '''
 
 
@@ -78,7 +78,7 @@ def changeIndexes(keys):
 	если пытаешься брать срез, keys присваивается объект среза вида: slice(1, None, None)'''
 	''' В других методах не используется, так как там нету объектов среза: slice(1, None, None), там можно просто отнять 1 от индекса или добавить
 	
-	revision: 3
+	rev. 3
 	'''
 	if isinstance(keys, slice):
 	
@@ -190,7 +190,7 @@ def sequence_get(self, keys):
 	'''Get method for sequences.
 	Returns value of element on position (keys). If such element is absent - returns None.
 	Used in: humlist, humtuple, humstr.
-	revision: 1
+	rev. 1
 	'''
 	try:
 		value = self.__getitem__(keys)
@@ -202,7 +202,7 @@ def sequence_get(self, keys):
 def sequence_index(self, value, *positions):
 	'''Index method for sequences.
 	Returns index of element with specified value (optional in positions).
-	revision: 1
+	rev. 1
 	'''
 	
 	length = len(positions)
@@ -228,7 +228,7 @@ def sequence_index(self, value, *positions):
 
 class humlist(list):
 	'''Class, that is the same to list type, but with normal indexes.
-	version: 2
+	rev. 2
 	'''
 
 	# Технические методы:
@@ -258,7 +258,7 @@ class humlist(list):
 
 class humtuple(tuple):
 	'''Class, that is the same to tuple type, but with normal indexes.
-	revision: 2
+	rev. 2
 	'''
 	
 	# Технические методы:
@@ -285,7 +285,7 @@ class humtuple(tuple):
 
 class humstr(str):
 	'''Class, that is the same to string type, but with normal indexes.
-	version: 2
+	rev. 2
 	'''
 	
 	# Технические методы:	
@@ -352,7 +352,7 @@ class humdict(dict):
 def humrange(*n):
 	'''Function, that is the same to range() function, but with normal indexes.
 	list(humrange(3)) == [1,2,3]; list(humrange(2, 3)) == [2,3]; list(humrange(10, 8, -1)) == [10, 9, 8]
-	revision: 2
+	rev. 2
 	'''
 	if len(n) >= 4:  # 4 and more arguments
 		return range(*n)  # will raise error
@@ -425,42 +425,51 @@ def humrange(*n):
 
 
 
-class humdrange():  # not a function because need of .__len__() method
-	'''Same as humrange, but including decimal (earlier was float) numbers.
+class humdrange():  # not a function because of need .__len__() method
+	'''Same as humrange, but including decimal (analog to float) numbers.
 	Returns Decimal() numbers.
-	rev. 1
+	rev. 3
 	'''
 	
-	def __init__(self, a, b, step):
-		self.check_type_errors(a, b, step)
+	def __init__(self, a, b, step, return_type='dec'):
+		'''Return type: 'dec' - decimal, 'float' - float, 'str' - string (float, written as string),
+		'int' - int.
+		rev. 2
+		'''
+		self.check_type_errors(a, b, step, return_type)
 		
 		a, b, step = Decimal(a), Decimal(b), Decimal(step)
 		
 		self.a, self.b, self.step = a, b, step
 		self.current = a
+		self.return_type = return_type
 		
 		self.check_logic_errors()
 		
 		self.length = self.__len__()
 	
 	
-	def check_type_errors(self, a, b, step):
+	def check_type_errors(self, a, b, step, return_type):
 		'''Is launched from .__init__().
 		rev.2
 		'''
-		# check for float
+		# check for float:
 		if (a.__class__ == float) or (b.__class__ == float) or (step.__class__ == float):
 			raise TypeError('Please, use Decimal(), int, or float, which is written as string (in quotes), because general float type cannot reproduce all numbers - some of them are changed to other, what causes errors.')
 		
-		# we check a
+		# we check a:
 		if not ((a.__class__ == int) or (a.__class__ == str) or (a.__class__ == Decimal)):
-			raise TypeError('Start value must be int or decimal, written as string, or Decimal')
-		# we check b
+			raise TypeError('Start value must be int or decimal, written as string, or Decimal.')
+		# we check b:
 		if not ((b.__class__ == int) or (b.__class__ == str) or (b.__class__ == Decimal)):
-			raise TypeError('Start value must be int or float, written as string, or Decimal')
-		# we check step
+			raise TypeError('Start value must be int or float, written as string, or Decimal.')
+		# we check step:
 		if not ((step.__class__ == int) or (step.__class__ == str) or (step.__class__ == Decimal)):
-			raise TypeError('Start value must be int or float, written as string, or Decimal')
+			raise TypeError('Start value must be int or float, written as string, or Decimal.')
+		
+		# we check return_type:
+		if not (type(return_type) == str):
+			raise TypeError('Return type must be specified with appropriate string.')
 	
 	
 	def check_logic_errors(self):
@@ -468,15 +477,22 @@ class humdrange():  # not a function because need of .__len__() method
 		Is launched from .__init__().
 		rev. 1
 		'''
+		# we check step
 		if self.step == 0:
 			raise ValueError("Step can't be equal to zero.")
 		
+		# we check a and b
 		if self.a > self.b:  # reverse order
 			if self.step > 0:
 				raise ValueError("Step can't be positive while reverse order.")
 		else:  # straight order or a == b
 			if self.step < 0:
 				raise ValueError("Step can't be negative while straight order.")
+		
+		# we check return type
+		if not ((self.return_type == 'dec') or (self.return_type == 'float') or 
+				(self.return_type == 'str') or (self.return_type == 'int')):
+					raise ValueError("Return type must be one of: 'dec', 'float', 'str', 'int', it was {0}.".format(type(self.return_type)))
 	
 	
 	
@@ -490,25 +506,25 @@ class humdrange():  # not a function because need of .__len__() method
 	
 		if self.first_time:  # first time
 			self.first_time = False
-			return self.a
+			return self.return_depending_type(self.a)
 		
 		self.current += self.step
 		
 		if self.a < self.b:  # straight order
 			if self.current <= self.b:
-				return self.current
+				return self.return_depending_type(self.current)
 			else:
 				raise StopIteration()
 		
 		elif self.a > self.b:  # reverse order
 			if self.current >= self.b:
-				return self.current
+				return self.return_depending_type(self.current)
 			else:
 				raise StopIteration()
 		
 		else:  # a == b
 			if self.current == self.a:
-				return self.a
+				return self.return_depending_type(self.a)
 			else:
 				raise StopIteration()
 	
@@ -527,19 +543,24 @@ class humdrange():  # not a function because need of .__len__() method
 	
 	
 	def __getitem__(self, key):
-		'''Returns or decimal number, if key is int, or new appropriate humdrange, if key is slice.
+		'''Returns one value if there's one key (it's int),
+		or new appropriate humdrange instance, if key is slice.
 		rev. 1
 		'''
 		if type(key) == int:
 			self.check_key_for_errors(key)
 			if self.a == self.b:
-				return self.a
+				return self.return_depending_type(self.a)
 			else:  # straight or reverse order
-				return self.a + (self.step * (key - 1))  # key can be only positive
+				return self.return_depending_type(self.a + (self.step * (key - 1)))
+				# key can be only positive
 		
 		elif type(key) == slice:  # (slice)
 			key = self.replace_negative_keys(key)
 			self.check_slice_for_errors(key)
+			
+			backup = self.return_type  # hack. if it'll be float - it'll pass it (float) to new
+			self.return_type = 'dec'  # humdrange's .__init__() method - it'll give errors.
 			
 			if key.start:
 				start = self[key.start]
@@ -554,7 +575,9 @@ class humdrange():  # not a function because need of .__len__() method
 			else:
 				step = self.step
 			
-			return humdrange(start, stop, step)
+			self.return_type = backup  # return back from hack
+			
+			return humdrange(start, stop, step, self.return_type)
 		
 		else:
 			raise TypeError('Key is not of an appropriate type. It must be int or slice.')
@@ -575,28 +598,28 @@ class humdrange():  # not a function because need of .__len__() method
 		'''
 		# check types
 		if not ( (type(key.start) == int) or (key.start == None) ):
-			raise TypeError('Start value must be int or omitted.')
+			raise TypeError("Start value must be int or omitted (now it is {0}).".format(key.start))
 		if not ( (type(key.stop) == int) or (key.stop == None) ):
-			raise TypeError('Stop value must be int or omitted.')
+			raise TypeError('Stop value must be int or omitted (now it is {0}).'.format(key.start))
 		if not ( (type(key.step) == int) or (key.step == None) ):
-			raise TypeError('Step value must be int or omitted.')	
+			raise TypeError('Step value must be int or omitted (now it is {0}).'.format(key.start))	
 		
 		# check start and stop indexes		
 		if key.start:
 			if not (1 <= key.start <= self.__len__()):
-				raise IndexError('Key index out of range.')
+				raise IndexError('Start key index out of range ({0}).'.format(key.start))
 		if key.stop:
 			if not (1 <= key.stop <= self.__len__()):
-				raise IndexError('Key index out of range.')
+				raise IndexError('Stop key index out of range ({0}).'.format(key.stop))
 		
 		# now we check step
 		if key.step:  # because if it's None, than will be error while "key.step > 0"				
 			if (key.start and key.stop) and (key.start > key.stop):  # reverse order
 				if key.step > 0:
-					raise ValueError('Step cannot be positive while reverse order.')
+					raise ValueError('Step cannot be positive ({0}) while reverse order.'.format(key.step))
 			else:  # straight order
 				if key.step < 0:
-					raise ValueError('Step cannot be negative while straight order.')
+					raise ValueError('Step cannot be negative ({0}) while straight order.'.format(key.step))
 		elif key.step == 0:			
 			raise ValueError('Step cannot be zero.')
 	
@@ -606,15 +629,31 @@ class humdrange():  # not a function because need of .__len__() method
 		It doesn't return anything - it replaces so it is.
 		'''
 		if key.start and (key.start < 0):
-			start = (self.__len__() + 1) - key.start
+			start = (self.__len__() + 1) + key.start  # + -key will give - key
 		else:
 			start = key.start
 		if key.stop and (key.stop < 0):
-			stop = (self.__len__() + 1) - key.start
+			stop = (self.__len__() + 1) + key.stop
 		else:
 			stop = key.stop
 		
 		return slice(start, stop, key.step)
+	
+	
+	
+	
+	def return_depending_type(self, value):
+		'''Returns value, depending on return type, specified in __init__().
+		rev. 1
+		'''
+		if self.return_type == 'dec':
+			return value
+		elif self.return_type == 'float':
+			return float(value)
+		elif self.return_type == 'str':
+			return str(value)
+		else:  # == 'int'
+			return int(value)
 
 
 
@@ -624,4 +663,4 @@ class humdrange():  # not a function because need of .__len__() method
 
 
 if __name__ == '__main__':  # temporary checks
-	list(humdrange('1', 2, '0.5')[1:])
+	pass
