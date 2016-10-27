@@ -71,163 +71,32 @@ from decimal import Decimal  # for humdrange
 
 
 
-"""def changeIndexes(keys):
-	'''('RU') Функция используется в: __getitem__, __setitem__, __delitem__.
-	Она смещает в последовательностях номер первого элемента с [1] на [0].
-	если в функц. передается один аргумент, он int и пишется в keys
-	если пытаешься брать срез, keys присваивается объект среза вида: slice(1, None, None)'''
-	''' В других методах не используется, так как там нету объектов среза: slice(1, None, None), там можно просто отнять 1 от индекса или добавить
-	
-	rev. 3
-	'''
-	if isinstance(keys, slice):
-	
-		'''if keys.start == 0:  # проверки:
-			raise IndexError('There is no element under index 0')'''
-		if keys.step == 0:
-			raise ValueError('slice step cannot be zero')
-
-		# обычный порядок всегда, кроме когда есть и 1 и 2, 2 больше 1
-		if (keys.start and (keys.stop != None)) and (keys.start > keys.stop):  # обратный порядок
-		
-			# проверки:
-			if keys.step == None: 
-				raise IndexError('Step cannot be default (positive) while reverse order.')
-			elif keys.step > 0:
-				raise IndexError('Step cannot be positive while reverse order.')
-				
-			if keys.start > 0:
-				start = keys.start - 1
-				if keys.stop >= 2:
-					stop = keys.stop - 2
-				elif 0 <= keys.stop  <= 1:
-					stop = None
-				else:
-					stop = keys.stop
-				keys = slice(start, stop, keys.step)
-			
-		else:  # прямой порядок
-			if keys.start:
-				if keys.start > 0:
-					keys = slice(keys.start - 1, keys.stop, keys.step)
-		
-
-	elif isinstance(keys, int): #если нет slice(), значит int
-	
-		if keys > 0:
-			keys = keys - 1
-		elif keys == 0:  # проверки:
-			raise IndexError('There is no element under index 0')
-	
-	return keys
-
-
-
-
-def change_indexes(key, beginning:int):
-	'''('RU') Функция используется в: __getitem__, __setitem__, __delitem__.
-	a[1] > a[0]
-	beginning (current): 1 - a starts from a[1]; 0 - a starts from a[0].
-	Она смещает в последовательностях номер первого элемента с [1] на [0].
-	если в функц. передается один аргумент, он int и пишется в keys
-	если пытаешься брать срез, keys присваивается объект среза вида: slice(1, None, None)'''
-	''' В других методах не используется, так как там нету объектов среза: slice(1, None, None), там можно просто отнять 1 от индекса или добавить
-	
-	rev. 4
-	'''
-	if type(key) == int: #если нет slice(), значит int
-	
-		if beginning == 1:
-			if key > 0:
-				key -= 1
-			elif key == 0:  # проверки:
-				raise IndexError('There is no element under index 0')
-		
-		elif beginning == 0:
-			if key >= 0:
-				key += 1
-		
-		else:
-			raise ValueError("Beginning can be 1 or 0, now it's {0}.".format(beginning))
-	
-	elif type(key) == slice:
-		'''if keys.start == 0:  # проверки:
-			raise IndexError('There is no element under index 0')'''
-		if key.step == 0:
-			raise ValueError('slice step cannot be zero')
-
-		# обратный порядок. Он только тогда, когда есть и 1 и 2, и 2 больше 1:
-		if ((key.start != None) and (key.stop != None)) and (key.start > key.stop):
-			# проверки:
-			if key.step == None:
-				raise IndexError('Step cannot be default (positive) while reverse order.')
-			elif key.step > 0:
-				raise IndexError('Step cannot be positive while reverse order.')
-			
-			if beginning == 1:
-				if key.start > 0:
-					start = key.start - 1
-					if key.stop >= 2:
-						stop = key.stop - 2
-					elif 0 <= key.stop  <= 1:
-						stop = None
-					else:
-						stop = key.stop
-					key = slice(start, stop, key.step)
-			
-			elif beginning == 0:
-				if key.start >= 0:
-					start = key.start + 1
-				stop = key.stop
-				key = slice(start, stop, key.step)
-			
-		else:  # прямой порядок
-			if beginning == 1:
-				if key.start:
-					if key.start > 0:
-						key = slice(key.start - 1, key.stop, key.step)
-			
-			elif beginning == 0:
-				if key.start >= 0:
-					start = key.start + 1
-				stop = key.stop
-				key = slice(start, stop, key.step)
-	
-	return key"""
-
-
-
 
 def change_indexes_0_to_1(key):
-	'''('RU') Функция используется в: __getitem__, __setitem__, __delitem__.
+	'''('RU') Функция используется в humdrange в __getitem__().
 	a[1] > a[0]
 	Она смещает в последовательностях номер первого элемента с [0] на [1].
 	если при a[arg] передается один аргумент, он int и пишется в keys
-	если пытаешься брать срез, keys присваивается объект среза вида: slice(1, None, None)'''
-	''' В других методах не используется, так как там нету объектов среза: slice(1, None, None), там можно просто отнять 1 от индекса или добавить
-	
+	если пытаешься брать срез, keys присваивается объект среза вида: slice(1, None, None)
 	rev. 5
 	'''
-	if type(key) == int: #если нет slice(), значит int		
+	if type(key) == int:	
 		
 		if key >= 0:
 			key += 1
 	
 	elif type(key) == slice:
 	
-		# обратный порядок. Он только тогда, когда есть и 1 и 2, и 2 больше 1:
-		if ((key.start != None) and (key.stop != None)) and (key.start > key.stop):
-		
-			#check_indexes(slice, 'r')
+		if key.step and (key.step < 0): # reverse order  
 			if key.start >= 0:
 				start = key.start + 1
 			key = slice(start, key.stop, key.step)
-			
-		else:  # прямой порядок			
+	
+		else:  # key.step > 0 and None >> straight order			
 			if key.start >= 0:
 				start = key.start + 1
 			stop = key.stop
-			key = slice(start, stop, key.step)
+			key = slice(start, stop, key.step)		
 	
 	return key
 
@@ -239,32 +108,17 @@ def change_indexes_1_to_0(key):
 	a[1] > a[0]
 	Она смещает в последовательностях номер первого элемента с [1] на [0].
 	если в функц. передается один аргумент, он int и пишется в keys
-	если пытаешься брать срез, keys присваивается объект среза вида: slice(1, None, None)'''
-	''' В других методах не используется, так как там нету объектов среза: slice(1, None, None), там можно просто отнять 1 от индекса или добавить
-	
+	если пытаешься брать срез, keys присваивается объект среза вида: slice(1, None, None)	
 	rev. 5
 	'''
-	if type(key) == int: #если нет slice(), значит int
+	if type(key) == int:
 		
 		if key > 0:
 			key -= 1
-		"""elif key == 0:  # проверки:
-			raise IndexError('There is no element under index 0')"""
 	
 	elif type(key) == slice:
-		'''if keys.start == 0:  # проверки:
-			raise IndexError('There is no element under index 0')'''
-		'''if key.step == 0:
-			raise ValueError('slice step cannot be zero')'''
-
-		# обратный порядок. Он только тогда, когда есть и 1 и 2, и 2 больше 1:
-		if ((key.start != None) and (key.stop != None)) and (key.start > key.stop):
-			# проверки:
-			"""if key.step == None:
-				raise IndexError('Step cannot be default (positive) while reverse order.')
-			elif key.step > 0:
-				raise IndexError('Step cannot be positive while reverse order.')"""
-			
+		
+		if key.step and (key.step < 0):  # reverse order
 			if key.start > 0:
 				start = key.start - 1
 				if key.stop >= 2:
@@ -274,9 +128,8 @@ def change_indexes_1_to_0(key):
 				else:
 					stop = key.stop
 				key = slice(start, stop, key.step)
-			
-		else:  # прямой порядок
-			
+		
+		else:  # key.step > 0 and None >> straight order
 			if key.start:
 				if key.start > 0:
 					key = slice(key.start - 1, key.stop, key.step)
@@ -585,20 +438,20 @@ def humrange(*n):
 class humdrange():  # not a function because of need .__len__() method
 	'''Same as humrange, but including decimal (analog to float) numbers.
 	Returns Decimal() numbers.
-	rev. 3
+	rev. 5
 	'''
+	
 	
 	def __init__(self, a, b, step, return_type='dec'):
 		'''Return type: 'dec' - decimal, 'float' - float, 'str' - string (float, written as string),
 		'int' - int.
-		rev. 2
+		rev. 3
 		'''
 		self.check_type_errors(a, b, step, return_type)
 		
 		a, b, step = Decimal(a), Decimal(b), Decimal(step)
 		
 		self.a, self.b, self.step = a, b, step
-		self.current = a
 		self.return_type = return_type
 		
 		self.check_logic_errors()
@@ -663,12 +516,13 @@ class humdrange():  # not a function because of need .__len__() method
 	
 	def __iter__(self):
 		self.first_time = True  # to return a first
+		self.current = self.a
 		return self
 	
 	
 	def __next__(self):
 	
-		if self.first_time:  # first time
+		if self.first_time:  # first value == self.a
 			self.first_time = False
 			return self.return_depending_type(self.a)
 		
@@ -702,7 +556,6 @@ class humdrange():  # not a function because of need .__len__() method
 			return int((self.b - self.a) / self.step + 1)
 		else:
 			return self.length
-		#self.get(length)
 	
 	
 	
@@ -723,7 +576,7 @@ class humdrange():  # not a function because of need .__len__() method
 			if self.a == self.b:
 				return self.return_depending_type(self.a)
 			
-			else:  # straight or reverse order
+			else:  # straight or reverse order resolved mathematically
 				return self.return_depending_type(self.a + (self.step * (key - 1)))
 		
 		elif type(key) == slice:
@@ -813,6 +666,7 @@ class humdrange():  # not a function because of need .__len__() method
 			raise TypeError('Stop value must be int or omitted (now it is {0}).'.format(key.start))
 		if not ( (type(key.step) == int) or (key.step == None) ):
 			raise TypeError('Step value must be int or omitted (now it is {0}).'.format(key.start))	
+		
 		
 		# check start and stop indexes to be in diapason or None	
 		if key.start != 0:
