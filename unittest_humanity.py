@@ -4,7 +4,7 @@
 Если знаем, что в самом методе проверки ошибка - используем 
 декоратор @unittest.expectedFailure.
 
-Revision: 6
+Revision: 7
 '''
 
 
@@ -468,11 +468,11 @@ class Testhumdrange(unittest.TestCase):
 	
 	
 	def test_humdrange_slices_errors_1(self):
-		with self.assertRaises(ValueError):  # because of zero passed to slice
+		with self.assertRaises(IndexError):  # because of zero passed to slice
 			humdrange(3, 5, '0.1')[0:2:-2]
 	
 	def test_humdrange_slices_errors_2(self):
-		with self.assertRaises(ValueError):  # because of zero passed to slice
+		with self.assertRaises(IndexError):  # because of zero passed to slice
 			humdrange(5, 3, '-0.1')[1:0:-2]
 	
 	def test_humdrange_slices_errors_3(self):
@@ -521,64 +521,102 @@ class Testdrange(unittest.TestCase):
 	def test_drange_slices_2(self):
 		'''Часть вперед.'''
 		self.assertEqual(list(drange(1, 8, 1, 'int')[2:4]), [3,4])
+	
+	def test_drange_slices_2_a(self):
+		'''Часть назад.'''
+		self.assertEqual(list(drange(1, 8, 1, 'int')[4:2:-1]), [5,4])
 
 	def test_drange_slices_3(self):
+		'''Весь вперед с шагом.'''
+		self.assertEqual( list(drange(1, 8, 1, 'int')[0:8:2]), [1,3,5,7] )
+	
+	def test_drange_slices_4(self):
+		'''Обратный порядок.'''
+		self.assertEqual( list(drange(1, 8, 1, 'int')[7::-1]), [8,7,6,5,4,3,2,1] )
+
+	def test_drange_slices_4_a(self):
+		'''Обратный порядок. Другой шаг.'''
+		self.assertEqual( tuple(drange(1, 8, 1, 'int')[7::-2]), (8,6,4,2) )
+
+	def test_drange_slices_4_b(self):
+		'''Обратный порядок. Выход за левую границу.'''
+		self.assertEqual( tuple(drange(1, 8, 1, 'int')[7:0:-2]), (8,6,4,2) )
+	
+	def test_drange_slices_4_c(self):
+		'''Обратный порядок. Выход за левую границу.'''
+		self.assertEqual( tuple(drange(1, 8, 1, 'int')[7:0:-1]), (8,7,6,5,4,3,2) )
+	
+	def test_drange_slices_5(self):
+		'''Обратный порядок. Выход за левую границу.'''
+		self.assertEqual( tuple(drange(1, 8, 1, 'int')[7:1:-1]), (8,7,6,5,4,3) )
+	
+	def test_drange_slices_5_b(self):
+		'''Обратный порядок. Выход за левую границу.'''
+		self.assertEqual( tuple(drange(1, 8, 1, 'int')[:1:-1]), (8,7,6,5,4,3) )
+	
+	def test_drange_slices_5_c(self):
+		'''Обратный порядок. Выход за левую границу.'''
+		self.assertEqual( tuple(drange(1, 8, 1, 'int')[::-1]), (8,7,6,5,4,3,2,1) )
+	
+	def test_drange_slices_6(self):
+		'''Обратный порядок. Шаг равен размеру массива (все как и в стандартном Python-e).'''
+		self.assertEqual( tuple(drange(1, 8, 1, 'int')[7::-7]), (8,1))
+	
+	
+	
+	def test_drange_slices_errors_1(self):
 		'''С середины до конца с выходом за правый край.'''
 		with self.assertRaises(IndexError):
 			drange(1, 8, 1, 'int')[2:100]
 	
-	def test_drange_slices_5(self):
-		'''Срез. Выход за оба края.'''
+	def test_drange_slices_errors_1_a(self):
+		'''Срез. Выход за правый край.'''
 		with self.assertRaises(IndexError):
 			drange(1, 8, 1, 'int')[0:100]
-
-	def test_drange_slices_6(self):
-		'''Весь вперед с шагом.'''
-		self.assertEqual( list(drange(1, 8, 1, 'int')[0:8:2]), [1,3,5,7] )
-
-	def test_drange_slices_7(self):
+	
+	def test_drange_slices_errors_2(self):
 		'''Шаг равен нулю.'''
 		with self.assertRaises(ValueError):
 			drange(1, 8, 1, 'int')[0:8:0]
 	
-	def test_drange_slices_8(self):
-		'''Обратный порядок.'''
-		self.assertEqual( list(drange(1, 8, 1, 'int')[7::-1]), [8,7,6,5,4,3,2,1] )
-
-	"""def test_drange_slices_9(self):
-		'''Обратный порядок. Другой шаг.'''
-		self.assertEqual( drange(1, 8, 1, 'int')[9:1:-2], create_sequence((9,7,5,3,1), self.classname)
-		)
-
-	def test_drange_slices_10(self):
-		'''Обратный порядок. Выход за левую границу.'''
-		self.assertEqual( drange(1, 8, 1, 'int')[10:1:-2], create_sequence((9,7,5,3,1), self.classname)
-		)
-
-	def test_drange_slices_11(self):
-		'''Обратный порядок. Выход за обе границы.'''
-		self.assertEqual( drange(1, 8, 1, 'int')[10:0:-2], create_sequence((9,7,5,3,1), self.classname)
-		)
-
-	def test_drange_slices_12(self):
-		'''Обратный порядок. Выход за обе границы. Другой шаг.'''
-		self.assertEqual( drange(1, 8, 1, 'int')[10:0:-1], create_sequence((9,8,7,6,5,4,3,2,1), self.classname)
-		)
-
-	def test_drange_slices_13(self):
+	def test_drange_slices_errors_2_a(self):
 		'''Обратный порядок. Шаг равен нулю.'''
 		with self.assertRaises(ValueError):
-			drange(1, 8, 1, 'int')[9:1:0]
-
-	def test_drange_slices_14(self):
-		'''Обратный порядок. Шаг равен размеру массива.'''
-		self.assertEqual( drange(1, 8, 1, 'int')[9:1:-9], create_sequence(9, self.classname)
-		)  # запятая для теста
-
-	def test_drange_slices_15(self):
-		'''Обратный порядок. Без шага.'''
+			drange(1, 8, 1, 'int')[7:1:0]
+	
+	def test_drange_slices_errors_3(self):
+		'''A > B при прямом порядке.'''
+		with self.assertRaises(ValueError):
+			drange(1, 8, 1, 'int')[7:1:1]
+	
+	def test_drange_slices_errors_3_c(self):
+		'''A < B при обратном порядке.'''
+		with self.assertRaises(ValueError):
+			drange(1, 8, 1, 'int')[5:6:-1]
+	
+	def test_drange_slices_errors_4(self):
+		'''B выходит за пределы - второй индекс берется не включительно при обр. порядке.'''
 		with self.assertRaises(IndexError):
-			drange(1, 8, 1, 'int')[9:1:]"""
+			drange(1, 8, 1, 'int')[1:7:-1]
+	
+	def test_drange_slices_errors_4_a(self):
+		'''B выходит за пределы - второй индекс берется не включительно при обр. порядке.'''
+		with self.assertRaises(IndexError):
+			drange(1, 8, 1, 'int')[7:7:-1]
+	
+	def test_drange_slices_5(self):
+		'''Обратный порядок. Выход за левую границу.'''
+		with self.assertRaises(IndexError):
+			drange(1, 8, 1, 'int')[10:0:-1]
+	
+	def test_drange_slices_5_a(self):
+		'''Прямой порядок порядок без шага (в прямом ошибок не будет).'''
+		with self.assertRaises(IndexError):
+			drange(1, 8, 1, 'int')[7:0:]
+
+
+
+
 
 
 

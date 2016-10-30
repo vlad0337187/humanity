@@ -73,7 +73,7 @@ from decimal import Decimal  # for humdrange
 
 
 def change_indexes_0_to_1(key):
-	'''('RU') Функция используется в humdrange в __getitem__().
+	'''('RU') Функция используется в drange в __getitem__().
 	a[1] > a[0]
 	Она смещает в последовательностях номер первого элемента с [0] на [1].
 	если при a[arg] передается один аргумент, он int и пишется в keys
@@ -88,15 +88,27 @@ def change_indexes_0_to_1(key):
 	elif type(key) == slice:
 	
 		if key.step and (key.step < 0): # reverse order  
-			if key.start >= 0:
+			if key.start and (key.start >= 0):
 				start = key.start + 1
-			key = slice(start, key.stop, key.step)
+			else:
+				start = key.start
+			
+			if key.stop != None:
+			
+				if key.stop >= 0:
+					stop = key.stop + 2
+				else:
+					stop = key.stop
+			else:
+				stop = None
+			
+			key = slice(start, stop, key.step)
 	
-		else:  # key.step > 0 and None >> straight order			
+		else:  # straight order, key.step > 0 and None
 			if key.start >= 0:
 				start = key.start + 1
-			stop = key.stop
-			key = slice(start, stop, key.step)		
+			
+			key = slice(start, key.stop, key.step)		
 	
 	return key
 
@@ -109,7 +121,7 @@ def change_indexes_1_to_0(key):
 	Она смещает в последовательностях номер первого элемента с [1] на [0].
 	если в функц. передается один аргумент, он int и пишется в keys
 	если пытаешься брать срез, keys присваивается объект среза вида: slice(1, None, None)	
-	rev. 5
+	rev. 6
 	'''
 	if type(key) == int:
 		
@@ -119,48 +131,50 @@ def change_indexes_1_to_0(key):
 	elif type(key) == slice:
 		
 		if key.step and (key.step < 0):  # reverse order
-			if key.start > 0:
+			if key.start and (key.start > 0):
 				start = key.start - 1
+			else:  # key.start == None, or == 0, or < 0.
+				start = key.start
+			
+			if key.stop != None:
 				if key.stop >= 2:
 					stop = key.stop - 2
 				elif 0 <= key.stop  <= 1:
 					stop = None
-				else:
-					stop = key.stop
-				key = slice(start, stop, key.step)
+			else:
+				stop = key.stop
+			
+			key = slice(start, stop, key.step)
 		
-		else:  # key.step > 0 and None >> straight order
-			if key.start:
-				if key.start > 0:
-					key = slice(key.start - 1, key.stop, key.step)
+		else:  #  straight order  # key.step > 0 and None
+			if key.start and (key.start > 0):
+				start = key.start - 1			
+				key = slice(key.start - 1, key.stop, key.step)
 	
 	return key
 
 
 
 
-def check_indexes(index_type, order='s'):
+"""def check_indexes_0_to_1():  # 
 	'''Check indexes for logic and type errors.
-	Order: 's' - straight, 'r' - reverse.
-	Used from change_indexes...() functions.
+	hack for drange because if reverse order and a is lesser than b - 
+	it gives another error -  Stop key index (9) out of range - 
+	it needs check for this earlier than for
+	
 	rev. 1
 	'''
 	if index_type == int:
 		pass
 	
 	elif index_type == slice:
-		if order == 's':
-			pass
-		elif order == 'r':
-			"""if key.step == None:
-				raise IndexError('Step cannot be default (positive) while reverse order.')
-			elif key.step > 0:
-				raise IndexError('Step cannot be positive while reverse order.')"""
-		else:
-			raise TypeError("Order must be or 's', or 'r' (str type), now it is {0}".format(type(index_type)))
+		if key.step and (key.step < 0):  # reverse order
+			if key.start < key.
+		
+		else: # straight order (step > 0 or None)
 	
 	else:
-		raise TypeError('Indexes must be int or slice type, now it is {0}'.format(type(index_type)))
+		raise TypeError('Indexes must be int or slice type, now it is {0}'.format(type(index_type)))"""
 
 
 
@@ -675,14 +689,14 @@ class humdrange():  # not a function because of need .__len__() method
 					raise IndexError('Start key index ({ind}) out of range (from 1 to {rng} or -1 to -{rng}).'\
 					.format(ind=key.start, rng=self.__len__()))
 		else:
-			raise ValueError('Slice start value cannot be equal zero.')
+			raise IndexError('Slice start value cannot be equal zero.')
 		if key.stop != 0:
 			if key.stop:  # None cannot be compared to int
 				if not ((1 <= key.stop <= self.__len__()) or (-1 >= key.stop >= -self.__len__())):
 					raise IndexError('Stop key index ({ind}) out of range (from 1 to {rng} or -1 to -{rng}).'\
 					.format(ind=key.stop, rng=self.__len__()))
 		else:
-			raise ValueError('Slice stop value cannot be equal zero.')
+			raise IndexError('Slice stop value cannot be equal zero.')
 		
 		
 		# check key.step, check start and stop depending on order (step sets order)
@@ -768,6 +782,7 @@ class humdrange():  # not a function because of need .__len__() method
 class drange(humdrange):
 	def __getitem__(self, key):
 		key = change_indexes_0_to_1(key)
+		#сheck_indexes_0_to_1(key)
 		return self.__class__.__base__.__getitem__(self, key)
 
 
