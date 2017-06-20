@@ -1,35 +1,5 @@
 #! /usr/bin/env python3
 ''' 
-('RU') Данный модуль заменяет стандартные типы данных последовательностей (списки, кортежи, строки) аналогичными типами данных,
-в которых индексация идет не с нуля а с единицы. Пример: a = humlist(1,2,3); print(a[2]) выведет 2.
-
-Содержит типы данных: 
-	humlist (аналог списков), humtuple (аналог кортежей), humstr (аналог строк)
-Содержит функции:
-	humrange (аналог range)
-
-Подключение модуля: 
-1) Добавим в sys.path расположение каталога (папки) с данным модулем. 
-	Пример 1 (простой):
-		import sys
-		sys.path.append('/home/user/modules')
-	Пример 2 (с относительными путями): 
-		import os, sys, inspect
-		# realpath() will make your script run, even if you symlink it :)
-		cmd_folder = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile( inspect.currentframe() ))[0]))
-		if cmd_folder not in sys.path:
-		sys.path.insert(0, cmd_folder)
-	Пример 3 (с относительными путями):
-		# use this if you want to include modules from a subfolder
-		cmd_subfolder = os.path.realpath(os.path.abspath(os.path.join(os.path.split(inspect.getfile( inspect.currentframe() ))[0],"subfolder")))
-		if cmd_subfolder not in sys.path:
-		sys.path.insert(0, cmd_subfolder)
-  Можно не добавлять если данный модуль находится в домашнем каталоге (папке). В некоторых ОС домашний каталог это тот, в котором
-  расположен файл с выполняемой программой.
-2) Импортируем его: from humanity import *
-  или: import humanity
-
-
 ('EN') This module replaces the standard sequence data types (lists, tuples, strings) similar types of data,
 in which indexation is not from zero but from one. Example: a = humlist(1,2,3); print(a[2]) will print 2.
 
@@ -59,6 +29,35 @@ Importing module:
 2) Import: import from humanity *
 or: import humanity
 
+('RU') Данный модуль заменяет стандартные типы данных последовательностей (списки, кортежи, строки) аналогичными типами данных,
+в которых индексация идет не с нуля а с единицы. Пример: a = humlist(1,2,3); print(a[2]) выведет 2.
+
+Содержит типы данных: 
+	humlist (аналог списков), humtuple (аналог кортежей), humstr (аналог строк)
+Содержит функции:
+	humrange (аналог range)
+
+Подключение модуля: 
+1) Добавим в sys.path расположение каталога (папки) с данным модулем. 
+	Пример 1 (простой):
+		import sys
+		sys.path.append('/home/user/modules')
+	Пример 2 (с относительными путями): 
+		import os, sys, inspect
+		# realpath() will make your script run, even if you symlink it :)
+		cmd_folder = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile( inspect.currentframe() ))[0]))
+		if cmd_folder not in sys.path:
+		sys.path.insert(0, cmd_folder)
+	Пример 3 (с относительными путями):
+		# use this if you want to include modules from a subfolder
+		cmd_subfolder = os.path.realpath(os.path.abspath(os.path.join(os.path.split(inspect.getfile( inspect.currentframe() ))[0],"subfolder")))
+		if cmd_subfolder not in sys.path:
+		sys.path.insert(0, cmd_subfolder)
+  Можно не добавлять если данный модуль находится в домашнем каталоге (папке). В некоторых ОС домашний каталог это тот, в котором
+  расположен файл с выполняемой программой.
+2) Импортируем его: from humanity import *
+  или: import humanity
+
 Revision: 8
 '''
 
@@ -68,14 +67,10 @@ from decimal import Decimal  # for humdrange
 
 
 
-
-
-
-
 def change_indexes_0_to_1(key):
 	'''('RU') Функция используется в drange в __getitem__().
 	a[1] > a[0]
-	Она смещает в последовательностях номер первого элемента с [0] на [1].
+	Она смещает в последовательностях номер первого элемента с [0] на [1] чтобы показать вам.
 	если при a[arg] передается один аргумент, он int и пишется в keys
 	если пытаешься брать срез, keys присваивается объект среза вида: slice(1, None, None)
 	rev. 5
@@ -118,7 +113,7 @@ def change_indexes_0_to_1(key):
 def change_indexes_1_to_0(key):
 	'''('RU') Функция используется в: __getitem__, __setitem__, __delitem__.
 	a[1] > a[0]
-	Она смещает в последовательностях номер первого элемента с [1] на [0].
+	Она смещает в последовательностях номер первого элемента с [1] на [0] когда вы его вводите.
 	если в функц. передается один аргумент, он int и пишется в keys
 	если пытаешься брать срез, keys присваивается объект среза вида: slice(1, None, None)	
 	rev. 6
@@ -156,215 +151,141 @@ def change_indexes_1_to_0(key):
 
 
 
-"""def check_indexes_0_to_1():  # 
-	'''Check indexes for logic and type errors.
-	hack for drange because if reverse order and a is lesser than b - 
-	it gives another error -  Stop key index (9) out of range - 
-	it needs check for this earlier than for
+def _generate_class_definition (name):
+	""" Generates class definition for humlist, humtuple, humstr classes.
+	"""
 	
-	rev. 1
+	class_definition = """
+class hum{name}({name}):
+	''' Class, that is the same to {name} type, but with normal indexes.
+	revision: 3
 	'''
-	if index_type == int:
-		pass
+""".format (name=name)
 	
-	elif index_type == slice:
-		if key.step and (key.step < 0):  # reverse order
-			if key.start < key.
+	
+	
+	# General methods (same for humlist, humstr, humtuple):
+	
+	class_definition += """
+	def __getitem__(self, keys):
+		''' Is launched when "a[0]".
+		'''
+		keys = change_indexes_1_to_0(keys)
+		return self.__class__.__base__.__getitem__(self, keys)
+"""
+	
+	class_definition += """
+	def __setitem__(self, keys, value):
+		''' Set self[key] to value. If A = [1,2,3], than A[1] = 5 will change A to: [5,2,3]
+		'''
+		keys = change_indexes_1_to_0(keys)
+		self.__class__.__base__.__setitem__(self, keys, value) # keys - итерируемый объект: (slice(1,2,1), ) или (1, )
+"""
+	
+	class_definition += """
+	def __delitem__(self, keys):
+		''' Delete self[key]. If A = [1,2,3], than A[1] = 5 will change A so: [5,2,3]''' 
+		keys = change_indexes_1_to_0(keys)
+		self.__class__.__base__.__delitem__(self, keys)
+"""
+
+	class_definition += """
+	def get(self, keys):
+		'''Get method for sequences.
+		Returns value of element on position (keys). If such element is absent - returns None.
+		Used in: humlist, humtuple, humstr.
+		rev. 1
+		'''
+		try:
+			value = self.__getitem__(keys)
+		except (IndexError, KeyError):
+			value = None
+		return value
+"""
+	
+	class_definition += """
+	def index(self, value, *positions):
+		'''Index method for sequences.
+		Returns index of element with specified value (optional in positions).
+		rev. 1
+		'''
 		
-		else: # straight order (step > 0 or None)
+		length = len(positions)
 	
-	else:
-		raise TypeError('Indexes must be int or slice type, now it is {0}'.format(type(index_type)))"""
-
-
-
-
-
-
-
-
-# __init__ and __new__ methods
-for name in ('list', 'tuple', 'str'):
-	if name == 'list':
-		method = '__init__'
-		retn = ''
-	else:  # tuple, str
-		method = '__new__'
-		retn = 'return '
-	exec(
-	"""def hum{name}{method}(self, *something):
-		'''('EN') humlist(1,2) > [1, 2]; humlist([1,2]) > [1, 2]; humlist((1,2), (2,3)) > [(1, 2), (2, 3)] 
-		('RU') Подобные есть и в humtuple и в humstr, только называется __new__.
+		if length >= 3:
+			raise TypeError('index() takes at most 3 arguments ({0} given)'.format(length+1))
+		elif length == 2:
+			start = positions[0] - 1
+			end = positions[1]
+			return self.__class__.__base__.index(self, value, start, end) + 1
+		elif length == 1:
+			start = positions[0] - 1
+			return self.__class__.__base__.index(self, value, start) + 1
+		else:  # если нет вообще позиций
+			return self.__class__.__base__.index(self, value) + 1
+"""
+	
+	class_definition += """
+	def {method}(self, *args):
+		''' Method for creating hum{name}. Is launched when:
+		a = humlist(1, 2)
 		'''	
 		
-		classname = 'hum{name}'  # потому что у неизменяемых объектов до создания экземпляра еще нету self.__class__
-		length = len(something)
+		classname = 'hum{name}'  # because immutable objects's instances don't have self.__class__ before creation
+		length = len(args)
 		
 		if length > 1:
 			if classname == 'humstr':
 				result = ''
-				for some in something:
+				for some in args:
 					result += str(some)
-				{retn}{name}.{method}(self, result)  # retn иногда возвращает, иногда - нет
+				{retn}{name}.{method}(self, result)  # retn can be "return ", can be absent
 			else:
-				{retn}{name}.{method}(self, something)
+				{retn}{name}.{method}(self, args)
 		
 		elif length == 1:
-			if something[0].__class__ == tuple:
-				{retn}{name}.{method}(self, something[0])  # tuple
+			if args[0].__class__ == tuple:
+				{retn}{name}.{method}(self, args[0])  # tuple
 			else:
 				if classname == 'humstr':
-					{retn}{name}.{method}(self, something[0])  # one element
+					{retn}{name}.{method}(self, args[0])  # one element
 				else:
-					{retn}{name}.{method}(self, something)  # tuple with one element
+					{retn}{name}.{method}(self, args)  # tuple with one element
 		
 		else:  # length == 0
-			{retn}{name}.{method}(self, something)""".format(name=name, method=method, retn=retn))
-else:
-	del method, retn, name
-
-
-
-
-def sequence__getitem__(self, keys):
-	keys = change_indexes_1_to_0(keys)
-	return self.__class__.__base__.__getitem__(self, keys)
-
-def sequence__setitem__(self, keys, value):
-	'''('EN') Set self[key] to value. If A = [1,2,3], than A[1] = 5 will change A to: [5,2,3]
-	'''
-	keys = change_indexes_1_to_0(keys)
-	self.__class__.__base__.__setitem__(self, keys, value) # keys - итерируемый объект: (slice(1,2,1), ) или (1, )
-
-def sequence__delitem__(self, keys):
-	'''('EN') Delete self[key]. If A = [1,2,3], than A[1] = 5 will change A so: [5,2,3]''' 
-	keys = change_indexes_1_to_0(keys)
-	self.__class__.__base__.__delitem__(self, keys)
-
-
-
-
-def sequence_get(self, keys):
-	'''Get method for sequences.
-	Returns value of element on position (keys). If such element is absent - returns None.
-	Used in: humlist, humtuple, humstr.
-	rev. 1
-	'''
-	try:
-		value = self.__getitem__(keys)
-	except (IndexError, KeyError):
-		value = None
-	return value
-
-
-def sequence_index(self, value, *positions):
-	'''Index method for sequences.
-	Returns index of element with specified value (optional in positions).
-	rev. 1
-	'''
-	
-	length = len(positions)
-	
-	if length >= 3:
-		raise TypeError('index() takes at most 3 arguments ({0} given)'.format(length+1))
-	elif length == 2:
-		start = positions[0] - 1
-		end = positions[1]
-		return self.__class__.__base__.index(self, value, start, end) + 1
-	elif length == 1:
-		start = positions[0] - 1
-		return self.__class__.__base__.index(self, value, start) + 1
-	else:  # если нет вообще позиций
-		return self.__class__.__base__.index(self, value) + 1
-
-
-
-
-
-
-
-
-class humlist(list):
-	'''Class, that is the same to list type, but with normal indexes.
-	rev. 2
-	'''
-
-	# Технические методы:
-	
-	__init__ = humlist__init__
-	
-	__getitem__ = sequence__getitem__
-	__setitem__ = sequence__setitem__
-	__delitem__ = sequence__delitem__
+			{retn}{name}.{method}(self)""".format (
+				name = name,
+				method = "__init__" if name == "list" else "__new__",
+				retn = "" if name == "list" else "return "
+	)  # can be optimized:
 	
 	
-	# Нетехнические методы:
 	
-	index = sequence_index
-	get = sequence_get
+	# Class-specific methods:
 	
+	## For humlist:
+	
+	insert_definition = """
 	def insert(self, position, value):
 		position = changeIndexes(position)
 		list.insert(self, position, value)
-
-
-
-
-
-
-
-
-class humtuple(tuple):
-	'''Class, that is the same to tuple type, but with normal indexes.
-	rev. 2
-	'''
+"""
 	
-	# Технические методы:
+	## For humtuple:  absent
 	
-	__new__ = humtuple__new__  # у неизменяемых типов только __new__() метод
+	## For humstr:
 	
-	
-	__getitem__ = sequence__getitem__
-	__setitem__ = sequence__setitem__
-	__delitem__ = sequence__delitem__
-	
-	
-	# Нетехнические методы:
-		
-	index = sequence_index
-	get = sequence_get
-
-
-
-
-
-
-
-
-class humstr(str):
-	'''Class, that is the same to string type, but with normal indexes.
-	rev. 2
-	'''
-	
-	# Технические методы:	
-	
-	__new__ = humstr__new__
-	
-	__getitem__ = sequence__getitem__
-	__setitem__ = sequence__setitem__
-	__delitem__ = sequence__delitem__
-	
-	
-	# Нетехнические методы:
-	
-	index = sequence_index
-	get = sequence_get
-	
+	find_definition = """
 	def find(self, value):
-		return str.find(self, value) + 1
-	# (rfind и так возвращает правильное значение)
+		result = str.find(self, value)
+		if result != -1:
+			return result + 1
+		else:
+			return result
+		
+"""
 	
-	
+	rindex_definition = """
 	def rindex(self, value, *positions):
 		length = len(positions)
 	
@@ -379,16 +300,41 @@ class humstr(str):
 			return self.__class__.__base__.index(self, value, start) + 1
 		else:  # если нет вообще позиций
 			return self.__class__.__base__.index(self, value) + 1
+"""
 	
-	
+	'''format_definition = """
 	def format(self, *args, **kwargs):
 		if args:
 			return str.format(self, '', *args, **kwargs)
 		else:
-			return str.format(self, **kwargs)
+			return str.format(self, *args, **kwargs)
+"""'''  # work on it
+	
+	
+	# let's construct it:
+		
+	if name == "list":
+		class_definition += insert_definition
+	
+	elif name == "tuple":
+		pass
+	
+	elif name == "str":
+		class_definition += find_definition  # rfind works as it is
+		class_definition += rindex_definition  # rfind works as it is
+		#class_definition += format_definition  # work on it
+ 
+	
+	return class_definition
 
 
 
+
+for name in ('list', 'tuple', 'str'):
+	exec (_generate_class_definition (name))	
+
+	
+	
 
 
 
@@ -398,7 +344,7 @@ class humdict(dict):
 	'''Same as dict, but with .get() method.
 	'''
 	
-	get = sequence_get  # it's appropriate
+	get = humlist.get  # it's appropriate
 
 
 
@@ -574,7 +520,7 @@ class humdrange():  # not a function because of need .__len__() method
 	
 	
 	
-	get = sequence_get
+	get = humlist.get  # humlist was created dynamically
 	
 		
 	def __getitem__(self, key):
