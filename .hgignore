@@ -1,6 +1,7 @@
 ^.git$
 ^humanity.egg-info$
 ^dist$
+^build$
 
 /__pycache__$
 /*\.pyc$

@@ -1,4 +1,9 @@
-from setuptools import setup, find_packages
+#from setuptools import setup, find_packages
+#from distutils.core import setup
+try:
+    from setuptools import setup
+except ImportError:
+    from distutils.core import setup
 from os.path import join, dirname
 import humanity
 
@@ -10,10 +15,12 @@ setup(
     
 	author='vlad1777d',
 	author_email='naumovvladislav@mail.ru',
+	url='https://github.com/vlad1777d/humanity',
     
-    packages = find_packages (),
-    long_description = open (join(dirname(__file__), 'README.md')).read (),
+    long_description = open ('README.md').read(),
     
-    test_suite = 'unittest_humanity'
+    test_suite = 'unittest_humanity',
+    
+    packages=['humanity'],  # packages = find_packages()
 )
 

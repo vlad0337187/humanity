@@ -63,6 +63,6 @@ Revision: 8
 from .main import *
 from .humd import *
 
-__version__ = '3.0'
+__version__ = '3.0.10'
 
 
