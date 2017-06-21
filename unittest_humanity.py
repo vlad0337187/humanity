@@ -10,7 +10,6 @@ Revision: 8
 
 import unittest
 from humanity import *
-import sys  #for testing
 
 
 
@@ -653,4 +652,5 @@ class Testdrange(unittest.TestCase):
 
 
 
-unittest.main()
+if __name__ == "__main__":
+	unittest.main()
